@@ -6,23 +6,30 @@ import com.svi.tictactoewebservice.exception.RecordSaveException;
 import com.svi.tictactoewebservice.model.GameId;
 import com.svi.tictactoewebservice.model.MoveRecord;
 import com.svi.tictactoewebservice.repository.GameRecordRepository;
+import com.svi.tictactoewebservice.repository.GameSessionRepository;
 import com.svi.tictactoewebservice.repository.PlayerRecordRepository;
 
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.UUID;
 
 public class GameService {
 
+    private static final String GAME_ID_SEPARATOR = "__";
+
     private final GameRecordRepository gameRecordRepository;
     private final PlayerRecordRepository playerRecordRepository;
+    private final GameSessionRepository gameSessionRepository;
 
     public GameService(
             GameRecordRepository gameRecordRepository,
-            PlayerRecordRepository playerRecordRepository) {
+            PlayerRecordRepository playerRecordRepository,
+            GameSessionRepository gameSessionRepository) {
 
         this.gameRecordRepository = gameRecordRepository;
         this.playerRecordRepository = playerRecordRepository;
+        this.gameSessionRepository = gameSessionRepository;
     }
 
     // ========================================
@@ -103,7 +110,44 @@ public class GameService {
     }
 
     // ========================================
-    // VALIDATION
+    // CREATE NEW GAME ID
+    // ========================================
+
+    public String createGameId(String gameCode) {
+
+        String gameId =
+                gameCode
+                        + GAME_ID_SEPARATOR
+                        + UUID.randomUUID().toString();
+
+        gameSessionRepository.saveCurrentGameId(
+                gameCode,
+                gameId
+        );
+
+        return gameId;
+    }
+
+    // ========================================
+    // GET CURRENT GAME ID
+    // ========================================
+
+    public String getCurrentGameId(String gameCode) {
+
+        String gameId =
+                gameSessionRepository.findCurrentGameId(gameCode);
+
+        if (gameId == null) {
+            throw new RecordNotFoundException(
+                    "Record not found"
+            );
+        }
+
+        return gameId;
+    }
+
+    // ========================================
+    // SAVE VALIDATION
     // ========================================
 
     private void validateSaveRequest(SaveRequest request) {

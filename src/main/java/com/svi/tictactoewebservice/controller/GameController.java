@@ -2,14 +2,17 @@ package com.svi.tictactoewebservice.controller;
 
 import com.svi.tictactoewebservice.dto.request.SaveRequest;
 import com.svi.tictactoewebservice.dto.response.GameDetailsResponse;
+import com.svi.tictactoewebservice.dto.response.GameIdResponse;
 import com.svi.tictactoewebservice.dto.response.GameListResponse;
 import com.svi.tictactoewebservice.dto.response.MessageResponse;
 import com.svi.tictactoewebservice.model.GameId;
 import com.svi.tictactoewebservice.model.MoveRecord;
 import com.svi.tictactoewebservice.repository.GameRecordRepository;
+import com.svi.tictactoewebservice.repository.GameSessionRepository;
 import com.svi.tictactoewebservice.repository.PlayerRecordRepository;
 import com.svi.tictactoewebservice.repository.file.FileGameRecordRepository;
 import com.svi.tictactoewebservice.repository.file.FilePlayerRecordRepository;
+import com.svi.tictactoewebservice.repository.memory.InMemoryGameSessionRepository;
 import com.svi.tictactoewebservice.service.GameService;
 
 import javax.ws.rs.Consumes;
@@ -37,9 +40,13 @@ public class GameController {
         PlayerRecordRepository playerRecordRepository =
                 new FilePlayerRecordRepository();
 
+        GameSessionRepository gameSessionRepository =
+                new InMemoryGameSessionRepository();
+
         this.gameService = new GameService(
                 gameRecordRepository,
-                playerRecordRepository
+                playerRecordRepository,
+                gameSessionRepository
         );
     }
 
@@ -96,6 +103,40 @@ public class GameController {
                         records,
                         "Records found"
                 ))
+                .build();
+    }
+
+    // ========================================
+    // CREATE NEW GAME ID
+    // ========================================
+
+    @POST
+    @Path("/session/{gameCode}/game")
+    public Response createGameId(
+            @PathParam("gameCode") String gameCode) {
+
+        String gameId =
+                gameService.createGameId(gameCode);
+
+        return Response
+                .ok(new GameIdResponse(gameId))
+                .build();
+    }
+
+    // ========================================
+    // GET CURRENT GAME ID
+    // ========================================
+
+    @GET
+    @Path("/session/{gameCode}/game")
+    public Response getCurrentGameId(
+            @PathParam("gameCode") String gameCode) {
+
+        String gameId =
+                gameService.getCurrentGameId(gameCode);
+
+        return Response
+                .ok(new GameIdResponse(gameId))
                 .build();
     }
 }
