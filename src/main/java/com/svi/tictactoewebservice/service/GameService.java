@@ -1,9 +1,13 @@
 package com.svi.tictactoewebservice.service;
 
+import com.svi.tictactoewebservice.dto.request.EmoteRequest;
+import com.svi.tictactoewebservice.dto.request.PlayerSessionRequest;
 import com.svi.tictactoewebservice.dto.request.SaveRequest;
+import com.svi.tictactoewebservice.dto.request.ScoreRequest;
 import com.svi.tictactoewebservice.exception.RecordNotFoundException;
 import com.svi.tictactoewebservice.exception.RecordSaveException;
 import com.svi.tictactoewebservice.model.GameId;
+import com.svi.tictactoewebservice.model.GameSession;
 import com.svi.tictactoewebservice.model.MoveRecord;
 import com.svi.tictactoewebservice.repository.GameRecordRepository;
 import com.svi.tictactoewebservice.repository.GameSessionRepository;
@@ -37,6 +41,7 @@ public class GameService {
     // ========================================
 
     public void save(SaveRequest request) {
+
         validateSaveRequest(request);
 
         MoveRecord record = new MoveRecord(
@@ -110,22 +115,34 @@ public class GameService {
     }
 
     // ========================================
-    // CREATE NEW GAME ID
+    // CREATE NEW ROUND / GAME ID
     // ========================================
 
     public String createGameId(String gameCode) {
 
-        String gameId =
-                gameCode
-                        + GAME_ID_SEPARATOR
-                        + UUID.randomUUID().toString();
+        GameSession session =
+                gameSessionRepository.getOrCreate(gameCode);
 
-        gameSessionRepository.saveCurrentGameId(
-                gameCode,
-                gameId
-        );
+        synchronized (session) {
 
-        return gameId;
+            String gameId =
+                    gameCode
+                            + GAME_ID_SEPARATOR
+                            + UUID.randomUUID().toString();
+
+            session.setCurrentGameId(gameId);
+
+            // New round: old emotes should not carry over.
+            session.setXEmoteId(null);
+            session.setXEmoteEventId(0);
+
+            session.setOEmoteId(null);
+            session.setOEmoteEventId(0);
+
+            gameSessionRepository.save(session);
+
+            return gameId;
+        }
     }
 
     // ========================================
@@ -134,21 +151,150 @@ public class GameService {
 
     public String getCurrentGameId(String gameCode) {
 
-        String gameId =
-                gameSessionRepository.findCurrentGameId(gameCode);
+        GameSession session =
+                getExistingSession(gameCode);
 
-        if (gameId == null) {
+        if (session.getCurrentGameId() == null) {
             throw new RecordNotFoundException(
                     "Record not found"
             );
         }
 
-        return gameId;
+        return session.getCurrentGameId();
     }
 
     // ========================================
-    // SAVE VALIDATION
+    // REGISTER / UPDATE PLAYER
     // ========================================
+
+    public void registerPlayer(
+            String gameCode,
+            PlayerSessionRequest request) {
+
+        GameSession session =
+                gameSessionRepository.getOrCreate(gameCode);
+
+        synchronized (session) {
+
+            if ("X".equalsIgnoreCase(request.getSymbol())) {
+
+                session.setXPlayerId(
+                        request.getPlayerid()
+                );
+
+                session.setXSushiId(
+                        request.getSushiid()
+                );
+
+            } else if ("O".equalsIgnoreCase(request.getSymbol())) {
+
+                session.setOPlayerId(
+                        request.getPlayerid()
+                );
+
+                session.setOSushiId(
+                        request.getSushiid()
+                );
+
+            } else {
+                throw new IllegalArgumentException(
+                        "Symbol must be X or O."
+                );
+            }
+
+            gameSessionRepository.save(session);
+        }
+    }
+
+    // ========================================
+    // UPDATE SCORE
+    // ========================================
+
+    public void updateScore(
+            String gameCode,
+            ScoreRequest request) {
+
+        GameSession session =
+                getExistingSession(gameCode);
+
+        synchronized (session) {
+
+            session.setXScore(request.getXscore());
+            session.setOScore(request.getOscore());
+
+            gameSessionRepository.save(session);
+        }
+    }
+
+    // ========================================
+    // SEND EMOTE
+    // ========================================
+
+    public void sendEmote(
+            String gameCode,
+            EmoteRequest request) {
+
+        GameSession session =
+                getExistingSession(gameCode);
+
+        synchronized (session) {
+
+            long eventId =
+                    session.getEmoteSequence() + 1;
+
+            session.setEmoteSequence(eventId);
+
+            if ("X".equalsIgnoreCase(request.getSymbol())) {
+
+                session.setXEmoteId(
+                        request.getEmoteid()
+                );
+
+                session.setXEmoteEventId(eventId);
+
+            } else if ("O".equalsIgnoreCase(request.getSymbol())) {
+
+                session.setOEmoteId(
+                        request.getEmoteid()
+                );
+
+                session.setOEmoteEventId(eventId);
+
+            } else {
+                throw new IllegalArgumentException(
+                        "Symbol must be X or O."
+                );
+            }
+
+            gameSessionRepository.save(session);
+        }
+    }
+
+    // ========================================
+    // GET FULL SESSION
+    // ========================================
+
+    public GameSession getSession(String gameCode) {
+        return getExistingSession(gameCode);
+    }
+
+    // ========================================
+    // HELPERS
+    // ========================================
+
+    private GameSession getExistingSession(String gameCode) {
+
+        GameSession session =
+                gameSessionRepository.findByGameCode(gameCode);
+
+        if (session == null) {
+            throw new RecordNotFoundException(
+                    "Record not found"
+            );
+        }
+
+        return session;
+    }
 
     private void validateSaveRequest(SaveRequest request) {
 

@@ -1,11 +1,16 @@
 package com.svi.tictactoewebservice.controller;
 
+import com.svi.tictactoewebservice.dto.request.EmoteRequest;
+import com.svi.tictactoewebservice.dto.request.PlayerSessionRequest;
 import com.svi.tictactoewebservice.dto.request.SaveRequest;
+import com.svi.tictactoewebservice.dto.request.ScoreRequest;
 import com.svi.tictactoewebservice.dto.response.GameDetailsResponse;
 import com.svi.tictactoewebservice.dto.response.GameIdResponse;
 import com.svi.tictactoewebservice.dto.response.GameListResponse;
+import com.svi.tictactoewebservice.dto.response.GameSessionResponse;
 import com.svi.tictactoewebservice.dto.response.MessageResponse;
 import com.svi.tictactoewebservice.model.GameId;
+import com.svi.tictactoewebservice.model.GameSession;
 import com.svi.tictactoewebservice.model.MoveRecord;
 import com.svi.tictactoewebservice.repository.GameRecordRepository;
 import com.svi.tictactoewebservice.repository.GameSessionRepository;
@@ -137,6 +142,92 @@ public class GameController {
 
         return Response
                 .ok(new GameIdResponse(gameId))
+                .build();
+    }
+
+    // ========================================
+    // REGISTER PLAYER
+    // ========================================
+
+    @POST
+    @Path("/session/{gameCode}/player")
+    @Consumes(MediaType.APPLICATION_JSON)
+    public Response registerPlayer(
+            @PathParam("gameCode") String gameCode,
+            PlayerSessionRequest request) {
+
+        gameService.registerPlayer(
+                gameCode,
+                request
+        );
+
+        return Response
+                .ok(new MessageResponse(
+                        "Player registered."
+                ))
+                .build();
+    }
+
+    // ========================================
+    // UPDATE SCORE
+    // ========================================
+
+    @POST
+    @Path("/session/{gameCode}/score")
+    @Consumes(MediaType.APPLICATION_JSON)
+    public Response updateScore(
+            @PathParam("gameCode") String gameCode,
+            ScoreRequest request) {
+
+        gameService.updateScore(
+                gameCode,
+                request
+        );
+
+        return Response
+                .ok(new MessageResponse(
+                        "Score updated."
+                ))
+                .build();
+    }
+
+    // ========================================
+    // SEND EMOTE
+    // ========================================
+
+    @POST
+    @Path("/session/{gameCode}/emote")
+    @Consumes(MediaType.APPLICATION_JSON)
+    public Response sendEmote(
+            @PathParam("gameCode") String gameCode,
+            EmoteRequest request) {
+
+        gameService.sendEmote(
+                gameCode,
+                request
+        );
+
+        return Response
+                .ok(new MessageResponse(
+                        "Emote sent."
+                ))
+                .build();
+    }
+
+    // ========================================
+    // GET FULL RUNTIME SESSION
+    // ========================================
+
+    @GET
+    @Path("/session/{gameCode}")
+    public Response getSession(
+            @PathParam("gameCode") String gameCode) {
+
+        GameSession session =
+                gameService.getSession(gameCode);
+
+        return Response
+                .ok(new GameSessionResponse(session))
                 .build();
     }
 }

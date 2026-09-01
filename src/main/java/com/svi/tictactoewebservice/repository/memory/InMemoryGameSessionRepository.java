@@ -1,5 +1,6 @@
 package com.svi.tictactoewebservice.repository.memory;
 
+import com.svi.tictactoewebservice.model.GameSession;
 import com.svi.tictactoewebservice.repository.GameSessionRepository;
 
 import java.util.Map;
@@ -8,19 +9,45 @@ import java.util.concurrent.ConcurrentHashMap;
 public class InMemoryGameSessionRepository
         implements GameSessionRepository {
 
-    private static final Map<String, String> CURRENT_GAMES =
+    private static final Map<String, GameSession> SESSIONS =
             new ConcurrentHashMap<>();
 
     @Override
-    public void saveCurrentGameId(
-            String gameCode,
-            String gameId) {
+    public GameSession getOrCreate(String gameCode) {
 
-        CURRENT_GAMES.put(gameCode, gameId);
+        GameSession existingSession =
+                SESSIONS.get(gameCode);
+
+        if (existingSession != null) {
+            return existingSession;
+        }
+
+        GameSession newSession =
+                new GameSession(gameCode);
+
+        GameSession previousSession =
+                SESSIONS.putIfAbsent(
+                        gameCode,
+                        newSession
+                );
+
+        if (previousSession != null) {
+            return previousSession;
+        }
+
+        return newSession;
     }
 
     @Override
-    public String findCurrentGameId(String gameCode) {
-        return CURRENT_GAMES.get(gameCode);
+    public GameSession findByGameCode(String gameCode) {
+        return SESSIONS.get(gameCode);
+    }
+
+    @Override
+    public void save(GameSession session) {
+        SESSIONS.put(
+                session.getGameCode(),
+                session
+        );
     }
 }

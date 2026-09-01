@@ -1,8 +1,12 @@
 package com.svi.tictactoewebservice.repository;
 
+import com.svi.tictactoewebservice.model.GameSession;
+
 public interface GameSessionRepository {
 
-    void saveCurrentGameId(String gameCode, String gameId);
+    GameSession getOrCreate(String gameCode);
 
-    String findCurrentGameId(String gameCode);
+    GameSession findByGameCode(String gameCode);
+
+    void save(GameSession session);
 }
