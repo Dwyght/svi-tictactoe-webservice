@@ -7,6 +7,7 @@ public interface GameRecordRepository {
 
     void save(MoveRecord record);
 
+    List<String> findAllGameIds();
     List<MoveRecord> findByGameId(String gameId);
     boolean existsByGameId(String gameId);
 }

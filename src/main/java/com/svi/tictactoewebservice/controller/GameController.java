@@ -73,6 +73,25 @@ public class GameController {
     }
 
     // ========================================
+    // GET ALL GAMES
+    // ========================================
+
+    @GET
+    @Path("/games")
+    public Response getAllGames() {
+
+        List<GameId> games =
+                gameService.getAllGames();
+
+        return Response
+                .ok(new GameListResponse(
+                        games,
+                        "Records found"
+                ))
+                .build();
+    }
+
+    // ========================================
     // GET PLAYER GAMES
     // ========================================
 

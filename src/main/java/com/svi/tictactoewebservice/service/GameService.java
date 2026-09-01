@@ -69,6 +69,30 @@ public class GameService {
     }
 
     // ========================================
+    // GET ALL GAMES
+    // ========================================
+
+    public List<GameId> getAllGames() {
+
+        List<String> gameIds =
+                gameRecordRepository.findAllGameIds();
+
+        if (gameIds.isEmpty()) {
+            throw new RecordNotFoundException(
+                    "Record not found"
+            );
+        }
+
+        List<GameId> games = new ArrayList<>();
+
+        for (String gameId : gameIds) {
+            games.add(new GameId(gameId));
+        }
+
+        return games;
+    }
+
+    // ========================================
     // GET PLAYER GAMES
     // ========================================
 

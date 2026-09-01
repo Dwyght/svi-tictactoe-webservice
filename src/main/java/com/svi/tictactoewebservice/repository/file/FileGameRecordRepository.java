@@ -6,6 +6,8 @@ import com.svi.tictactoewebservice.util.FileUtil;
 
 import java.io.*;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
 import java.util.List;
 
 public class FileGameRecordRepository implements GameRecordRepository {
@@ -23,6 +25,36 @@ public class FileGameRecordRepository implements GameRecordRepository {
         } catch (IOException e) {
             throw new RuntimeException("Could not save game record.", e);
         }
+    }
+
+    @Override
+    public List<String> findAllGameIds() {
+        File directory = FileUtil.getRecordsDirectory();
+        File[] recordFiles = directory.listFiles(
+                file -> file.isFile()
+                        && file.getName().endsWith(".txt")
+        );
+
+        List<String> gameIds = new ArrayList<>();
+
+        if (recordFiles == null) {
+            return gameIds;
+        }
+
+        Arrays.sort(
+                recordFiles,
+                Comparator.comparing(File::getName)
+        );
+
+        for (File file : recordFiles) {
+            String gameId = findGameId(file);
+
+            if (gameId != null) {
+                gameIds.add(gameId);
+            }
+        }
+
+        return gameIds;
     }
 
     @Override
@@ -61,6 +93,43 @@ public class FileGameRecordRepository implements GameRecordRepository {
                 + record.getSymbol() + ","
                 + record.getLocation() + ","
                 + record.getDatesave();
+    }
+
+    private String findGameId(File file) {
+        String fileName = file.getName();
+        String expectedGameId = fileName.substring(
+                0,
+                fileName.length() - ".txt".length()
+        );
+
+        try (BufferedReader reader = new BufferedReader(
+                new FileReader(file))) {
+
+            String line;
+
+            while ((line = reader.readLine()) != null) {
+                if (line.trim().isEmpty()) {
+                    continue;
+                }
+
+                String[] values = line.split(",", -1);
+
+                if (values.length == 5
+                        && expectedGameId.equals(values[0])) {
+                    return expectedGameId;
+                }
+
+                return null;
+            }
+
+            return null;
+
+        } catch (IOException e) {
+            throw new RuntimeException(
+                    "Could not read game records.",
+                    e
+            );
+        }
     }
 
     private MoveRecord toMoveRecord(String line) {
