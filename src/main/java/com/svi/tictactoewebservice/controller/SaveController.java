@@ -37,26 +37,10 @@ public class SaveController {
 
     @POST
     public Response save(SaveRequest request) {
-        try {
-            saveService.save(request);
+        saveService.save(request);
 
-            return Response
-                    .ok(new MessageResponse("Record saved."))
-                    .build();
-
-        } catch (IllegalArgumentException e) {
-            return Response
-                    .status(401)
-                    .entity(new MessageResponse("Record could not be saved"))
-                    .build();
-
-        } catch (Exception e) {
-            return Response
-                    .status(Response.Status.INTERNAL_SERVER_ERROR)
-                    .entity(new MessageResponse(
-                            "The server ran into an unexpected exception."
-                    ))
-                    .build();
-        }
+        return Response
+                .ok(new MessageResponse("Record saved."))
+                .build();
     }
 }

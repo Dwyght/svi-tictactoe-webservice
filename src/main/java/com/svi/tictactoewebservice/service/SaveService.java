@@ -1,7 +1,8 @@
 package com.svi.tictactoewebservice.service;
 
-import com.svi.tictactoewebservice.model.MoveRecord;
 import com.svi.tictactoewebservice.dto.request.SaveRequest;
+import com.svi.tictactoewebservice.exception.RecordSaveException;
+import com.svi.tictactoewebservice.model.MoveRecord;
 import com.svi.tictactoewebservice.repository.GameRecordRepository;
 import com.svi.tictactoewebservice.repository.PlayerRecordRepository;
 
@@ -29,17 +30,27 @@ public class SaveService {
                 request.getDatesave()
         );
 
-        playerRecordRepository.saveGameId(
-                request.getPlayerid(),
-                request.getGameid()
-        );
+        try {
+            playerRecordRepository.saveGameId(
+                    request.getPlayerid(),
+                    request.getGameid()
+            );
 
-        gameRecordRepository.save(record);
+            gameRecordRepository.save(record);
+
+        } catch (RuntimeException e) {
+            throw new RecordSaveException(
+                    "Record could not be saved",
+                    e
+            );
+        }
     }
 
     private void validate(SaveRequest request) {
         if (request == null) {
-            throw new IllegalArgumentException("Request is required.");
+            throw new RecordSaveException(
+                    "Record could not be saved"
+            );
         }
 
         if (isBlank(request.getGameid())
@@ -48,7 +59,9 @@ public class SaveService {
                 || isBlank(request.getLocation())
                 || isBlank(request.getDatesave())) {
 
-            throw new IllegalArgumentException("All fields are required.");
+            throw new RecordSaveException(
+                    "Record could not be saved"
+            );
         }
     }
 

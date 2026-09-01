@@ -1,8 +1,7 @@
 package com.svi.tictactoewebservice.controller;
 
-import com.svi.tictactoewebservice.model.GameId;
 import com.svi.tictactoewebservice.dto.response.GameListResponse;
-import com.svi.tictactoewebservice.dto.response.MessageResponse;
+import com.svi.tictactoewebservice.model.GameId;
 import com.svi.tictactoewebservice.repository.PlayerRecordRepository;
 import com.svi.tictactoewebservice.repository.file.FilePlayerRecordRepository;
 import com.svi.tictactoewebservice.service.PlayerGameService;
@@ -32,31 +31,17 @@ public class PlayerGameController {
 
     @GET
     @Path("/{playerId}")
-    public Response getGames(@PathParam("playerId") String playerId) {
-        try {
-            List<GameId> games = playerGameService.getGames(playerId);
+    public Response getGames(
+            @PathParam("playerId") String playerId) {
 
-            if (games == null) {
-                return Response
-                        .status(402)
-                        .entity(new MessageResponse("Record not found"))
-                        .build();
-            }
+        List<GameId> games =
+                playerGameService.getGames(playerId);
 
-            return Response
-                    .ok(new GameListResponse(
-                            games,
-                            "Records found"
-                    ))
-                    .build();
-
-        } catch (Exception e) {
-            return Response
-                    .status(Response.Status.INTERNAL_SERVER_ERROR)
-                    .entity(new MessageResponse(
-                            "The server ran into an unexpected exception."
-                    ))
-                    .build();
-        }
+        return Response
+                .ok(new GameListResponse(
+                        games,
+                        "Records found"
+                ))
+                .build();
     }
 }
