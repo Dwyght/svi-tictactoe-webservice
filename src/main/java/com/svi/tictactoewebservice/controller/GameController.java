@@ -20,6 +20,7 @@ import com.svi.tictactoewebservice.repository.file.FilePlayerRecordRepository;
 import com.svi.tictactoewebservice.repository.memory.InMemoryGameSessionRepository;
 import com.svi.tictactoewebservice.service.GameService;
 
+import javax.validation.Valid;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
@@ -154,7 +155,7 @@ public class GameController {
     @Consumes(MediaType.APPLICATION_JSON)
     public Response registerPlayer(
             @PathParam("gameCode") String gameCode,
-            PlayerSessionRequest request) {
+            @Valid PlayerSessionRequest request) {
 
         gameService.registerPlayer(
                 gameCode,
@@ -177,7 +178,7 @@ public class GameController {
     @Consumes(MediaType.APPLICATION_JSON)
     public Response updateScore(
             @PathParam("gameCode") String gameCode,
-            ScoreRequest request) {
+            @Valid ScoreRequest request) {
 
         gameService.updateScore(
                 gameCode,
@@ -200,7 +201,7 @@ public class GameController {
     @Consumes(MediaType.APPLICATION_JSON)
     public Response sendEmote(
             @PathParam("gameCode") String gameCode,
-            EmoteRequest request) {
+            @Valid EmoteRequest request) {
 
         gameService.sendEmote(
                 gameCode,

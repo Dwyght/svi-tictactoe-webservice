@@ -176,7 +176,7 @@ public class GameService {
 
         synchronized (session) {
 
-            if ("X".equalsIgnoreCase(request.getSymbol())) {
+            if ("X".equals(request.getSymbol())) {
 
                 session.setXPlayerId(
                         request.getPlayerid()
@@ -186,7 +186,7 @@ public class GameService {
                         request.getSushiid()
                 );
 
-            } else if ("O".equalsIgnoreCase(request.getSymbol())) {
+            } else {
 
                 session.setOPlayerId(
                         request.getPlayerid()
@@ -196,10 +196,6 @@ public class GameService {
                         request.getSushiid()
                 );
 
-            } else {
-                throw new IllegalArgumentException(
-                        "Symbol must be X or O."
-                );
             }
 
             gameSessionRepository.save(session);
@@ -244,7 +240,7 @@ public class GameService {
 
             session.setEmoteSequence(eventId);
 
-            if ("X".equalsIgnoreCase(request.getSymbol())) {
+            if ("X".equals(request.getSymbol())) {
 
                 session.setXEmoteId(
                         request.getEmoteid()
@@ -252,7 +248,7 @@ public class GameService {
 
                 session.setXEmoteEventId(eventId);
 
-            } else if ("O".equalsIgnoreCase(request.getSymbol())) {
+            } else {
 
                 session.setOEmoteId(
                         request.getEmoteid()
@@ -260,10 +256,6 @@ public class GameService {
 
                 session.setOEmoteEventId(eventId);
 
-            } else {
-                throw new IllegalArgumentException(
-                        "Symbol must be X or O."
-                );
             }
 
             gameSessionRepository.save(session);
@@ -305,7 +297,8 @@ public class GameService {
         }
 
         if (isBlank(request.getGameid())
-                || isBlank(request.getPlayerid())
+                || !request.getPlayerid()
+                .matches("^[A-Za-z0-9_-]{1,10}$")
                 || isBlank(request.getSymbol())
                 || isBlank(request.getLocation())
                 || isBlank(request.getDatesave())) {
