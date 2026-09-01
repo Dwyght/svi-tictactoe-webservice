@@ -1,24 +1,95 @@
 package com.svi.tictactoewebservice.service;
 
+import com.svi.tictactoewebservice.dto.request.SaveRequest;
 import com.svi.tictactoewebservice.exception.RecordNotFoundException;
+import com.svi.tictactoewebservice.exception.RecordSaveException;
+import com.svi.tictactoewebservice.model.GameId;
 import com.svi.tictactoewebservice.model.MoveRecord;
 import com.svi.tictactoewebservice.repository.GameRecordRepository;
+import com.svi.tictactoewebservice.repository.PlayerRecordRepository;
 
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
 public class GameService {
 
     private final GameRecordRepository gameRecordRepository;
+    private final PlayerRecordRepository playerRecordRepository;
 
-    public GameService(GameRecordRepository gameRecordRepository) {
+    public GameService(
+            GameRecordRepository gameRecordRepository,
+            PlayerRecordRepository playerRecordRepository) {
+
         this.gameRecordRepository = gameRecordRepository;
+        this.playerRecordRepository = playerRecordRepository;
     }
+
+    // ========================================
+    // SAVE MOVE
+    // ========================================
+
+    public void save(SaveRequest request) {
+        validateSaveRequest(request);
+
+        MoveRecord record = new MoveRecord(
+                request.getGameid(),
+                request.getPlayerid(),
+                request.getSymbol(),
+                request.getLocation(),
+                request.getDatesave()
+        );
+
+        try {
+            playerRecordRepository.saveGameId(
+                    request.getPlayerid(),
+                    request.getGameid()
+            );
+
+            gameRecordRepository.save(record);
+
+        } catch (RuntimeException e) {
+            throw new RecordSaveException(
+                    "Record could not be saved",
+                    e
+            );
+        }
+    }
+
+    // ========================================
+    // GET PLAYER GAMES
+    // ========================================
+
+    public List<GameId> getPlayerGames(String playerId) {
+
+        if (!playerRecordRepository.existsByPlayerId(playerId)) {
+            throw new RecordNotFoundException(
+                    "Record not found"
+            );
+        }
+
+        List<String> gameIds =
+                playerRecordRepository.findGameIdsByPlayerId(playerId);
+
+        List<GameId> games = new ArrayList<>();
+
+        for (String gameId : gameIds) {
+            games.add(new GameId(gameId));
+        }
+
+        return games;
+    }
+
+    // ========================================
+    // GET GAME DETAILS
+    // ========================================
 
     public List<MoveRecord> getGame(String gameId) {
 
         if (!gameRecordRepository.existsByGameId(gameId)) {
-            throw new RecordNotFoundException("Record not found");
+            throw new RecordNotFoundException(
+                    "Record not found"
+            );
         }
 
         List<MoveRecord> records =
@@ -29,5 +100,33 @@ public class GameService {
         );
 
         return records;
+    }
+
+    // ========================================
+    // VALIDATION
+    // ========================================
+
+    private void validateSaveRequest(SaveRequest request) {
+
+        if (request == null) {
+            throw new RecordSaveException(
+                    "Record could not be saved"
+            );
+        }
+
+        if (isBlank(request.getGameid())
+                || isBlank(request.getPlayerid())
+                || isBlank(request.getSymbol())
+                || isBlank(request.getLocation())
+                || isBlank(request.getDatesave())) {
+
+            throw new RecordSaveException(
+                    "Record could not be saved"
+            );
+        }
+    }
+
+    private boolean isBlank(String value) {
+        return value == null || value.trim().isEmpty();
     }
 }
