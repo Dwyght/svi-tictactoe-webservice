@@ -1,7 +1,7 @@
 package com.svi.tictactoewebservice.controller;
 
-import com.svi.tictactoewebservice.model.request.SaveRequest;
-import com.svi.tictactoewebservice.model.response.MessageResponse;
+import com.svi.tictactoewebservice.dto.request.SaveRequest;
+import com.svi.tictactoewebservice.dto.response.MessageResponse;
 import com.svi.tictactoewebservice.repository.GameRecordRepository;
 import com.svi.tictactoewebservice.repository.PlayerRecordRepository;
 import com.svi.tictactoewebservice.repository.file.FileGameRecordRepository;

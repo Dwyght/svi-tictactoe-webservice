@@ -1,8 +1,8 @@
 package com.svi.tictactoewebservice.controller;
 
 import com.svi.tictactoewebservice.model.GameId;
-import com.svi.tictactoewebservice.model.response.GameListResponse;
-import com.svi.tictactoewebservice.model.response.MessageResponse;
+import com.svi.tictactoewebservice.dto.response.GameListResponse;
+import com.svi.tictactoewebservice.dto.response.MessageResponse;
 import com.svi.tictactoewebservice.repository.PlayerRecordRepository;
 import com.svi.tictactoewebservice.repository.file.FilePlayerRecordRepository;
 import com.svi.tictactoewebservice.service.PlayerGameService;

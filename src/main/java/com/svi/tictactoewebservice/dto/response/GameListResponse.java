@@ -1,4 +1,4 @@
-package com.svi.tictactoewebservice.model.response;
+package com.svi.tictactoewebservice.dto.response;
 
 import com.svi.tictactoewebservice.model.GameId;
 import java.util.List;

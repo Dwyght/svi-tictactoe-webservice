@@ -1,7 +1,7 @@
 package com.svi.tictactoewebservice.service;
 
 import com.svi.tictactoewebservice.model.MoveRecord;
-import com.svi.tictactoewebservice.model.request.SaveRequest;
+import com.svi.tictactoewebservice.dto.request.SaveRequest;
 import com.svi.tictactoewebservice.repository.GameRecordRepository;
 import com.svi.tictactoewebservice.repository.PlayerRecordRepository;
 

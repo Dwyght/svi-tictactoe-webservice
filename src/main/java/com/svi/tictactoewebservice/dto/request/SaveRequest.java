@@ -1,4 +1,4 @@
-package com.svi.tictactoewebservice.model.request;
+package com.svi.tictactoewebservice.dto.request;
 
 public class SaveRequest {
 

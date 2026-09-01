@@ -1,4 +1,4 @@
-package com.svi.tictactoewebservice.model.response;
+package com.svi.tictactoewebservice.dto.response;
 
 public class MessageResponse {
 
