@@ -2,6 +2,7 @@ package com.svi.tictactoewebservice.dto.request;
 
 public class SaveRequest {
 
+    private String roomid;
     private String gameid;
     private String playerid;
     private String symbol;
@@ -9,6 +10,14 @@ public class SaveRequest {
     private String datesave;
 
     public SaveRequest() {
+    }
+
+    public String getRoomid() {
+        return roomid;
+    }
+
+    public void setRoomid(String roomid) {
+        this.roomid = roomid;
     }
 
     public String getGameid() {

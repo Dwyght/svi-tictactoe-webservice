@@ -47,6 +47,8 @@ public class GameService {
 
         validateSaveRequest(request);
 
+        GameSession session = getSessionForSave(request);
+
         MoveRecord record = new MoveRecord(
                 request.getGameid(),
                 request.getPlayerid(),
@@ -55,19 +57,33 @@ public class GameService {
                 request.getDatesave()
         );
 
-        try {
-            playerRecordRepository.saveGameId(
-                    request.getPlayerid(),
-                    request.getGameid()
-            );
+        synchronized (session) {
+            if (!request.getGameid().equals(
+                    session.getCurrentGameId())) {
+                throw new RecordSaveException(
+                        "Record could not be saved"
+                );
+            }
 
-            gameRecordRepository.save(record);
+            try {
+                gameRecordRepository.save(record);
 
-        } catch (RuntimeException e) {
-            throw new RecordSaveException(
-                    "Record could not be saved",
-                    e
-            );
+                playerRecordRepository.saveGameId(
+                        request.getPlayerid(),
+                        request.getGameid()
+                );
+
+                roomRecordRepository.saveGameId(
+                        request.getRoomid(),
+                        request.getGameid()
+                );
+
+            } catch (RuntimeException e) {
+                throw new RecordSaveException(
+                        "Record could not be saved",
+                        e
+                );
+            }
         }
     }
 
@@ -212,7 +228,6 @@ public class GameService {
             session.setOEmoteEventId(0);
 
             gameSessionRepository.save(session);
-            roomRecordRepository.saveGameId(gameCode, gameId);
 
             return gameId;
         }
@@ -379,7 +394,8 @@ public class GameService {
             );
         }
 
-        if (isBlank(request.getGameid())
+        if (isBlank(request.getRoomid())
+                || isBlank(request.getGameid())
                 || !request.getPlayerid()
                 .matches("^[A-Za-z0-9_-]{1,10}$")
                 || isBlank(request.getSymbol())
@@ -402,6 +418,22 @@ public class GameService {
                     "Player name is already being used in this room."
             );
         }
+    }
+
+    private GameSession getSessionForSave(SaveRequest request) {
+
+        GameSession session =
+                gameSessionRepository.findByGameCode(
+                        request.getRoomid()
+                );
+
+        if (session == null) {
+            throw new RecordSaveException(
+                    "Record could not be saved"
+            );
+        }
+
+        return session;
     }
 
     private boolean isBlank(String value) {
