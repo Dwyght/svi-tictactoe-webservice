@@ -1,10 +1,11 @@
 package com.svi.tictactoewebservice.util;
 
+import com.svi.tictactoewebservice.config.Config;
+
 import java.io.File;
 
 public final class FileUtil {
 
-    private static final String RECORDS_DIRECTORY = "records";
     private static final String PLAYERS_DIRECTORY = "players";
     private static final String ROOMS_DIRECTORY = "rooms";
     private static final String GAMES_DIRECTORY = "games";
@@ -13,7 +14,9 @@ public final class FileUtil {
     }
 
     public static File getRecordsDirectory() {
-        return getOrCreateDirectory(new File(RECORDS_DIRECTORY));
+        return getOrCreateDirectory(
+                new File(Config.RECORDS_DIRECTORY.getValue())
+        );
     }
 
     public static File getPlayersDirectory() {
