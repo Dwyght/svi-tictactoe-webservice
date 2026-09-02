@@ -10,6 +10,8 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
 import java.util.List;
 
 public class FileRoomRecordRepository implements RoomRecordRepository {
@@ -31,6 +33,36 @@ public class FileRoomRecordRepository implements RoomRecordRepository {
         } catch (IOException e) {
             throw new RuntimeException("Could not save room record.", e);
         }
+    }
+
+    @Override
+    public List<String> findAllRoomIds() {
+        File directory = FileUtil.getRoomsDirectory();
+        File[] recordFiles = directory.listFiles(
+                file -> file.isFile()
+                        && file.getName().endsWith(".txt")
+        );
+
+        List<String> roomIds = new ArrayList<>();
+
+        if (recordFiles == null) {
+            return roomIds;
+        }
+
+        Arrays.sort(
+                recordFiles,
+                Comparator.comparing(File::getName)
+        );
+
+        for (File file : recordFiles) {
+            String fileName = file.getName();
+            roomIds.add(fileName.substring(
+                    0,
+                    fileName.length() - ".txt".length()
+            ));
+        }
+
+        return roomIds;
     }
 
     @Override

@@ -119,6 +119,30 @@ public class GameService {
     }
 
     // ========================================
+    // GET ALL ROOMS
+    // ========================================
+
+    public List<GameId> getAllRooms() {
+
+        List<String> roomIds =
+                roomRecordRepository.findAllRoomIds();
+
+        if (roomIds.isEmpty()) {
+            throw new RecordNotFoundException(
+                    "Record not found"
+            );
+        }
+
+        List<GameId> rooms = new ArrayList<>();
+
+        for (String roomId : roomIds) {
+            rooms.add(new GameId(roomId));
+        }
+
+        return rooms;
+    }
+
+    // ========================================
     // GET ROOM GAMES
     // ========================================
 

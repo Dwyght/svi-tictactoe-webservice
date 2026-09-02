@@ -118,6 +118,25 @@ public class GameController {
     }
 
     // ========================================
+    // GET ALL ROOMS
+    // ========================================
+
+    @GET
+    @Path("/rooms")
+    public Response getAllRooms() {
+
+        List<GameId> rooms =
+                gameService.getAllRooms();
+
+        return Response
+                .ok(new GameListResponse(
+                        rooms,
+                        "Records found"
+                ))
+                .build();
+    }
+
+    // ========================================
     // GET ROOM GAMES
     // ========================================
 
