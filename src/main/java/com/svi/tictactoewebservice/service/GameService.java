@@ -6,6 +6,7 @@ import com.svi.tictactoewebservice.dto.request.SaveRequest;
 import com.svi.tictactoewebservice.dto.request.ScoreRequest;
 import com.svi.tictactoewebservice.exception.RecordNotFoundException;
 import com.svi.tictactoewebservice.exception.RecordSaveException;
+import com.svi.tictactoewebservice.exception.PlayerNameConflictException;
 import com.svi.tictactoewebservice.model.GameId;
 import com.svi.tictactoewebservice.model.GameSession;
 import com.svi.tictactoewebservice.model.MoveRecord;
@@ -250,6 +251,11 @@ public class GameService {
 
             if ("X".equals(request.getSymbol())) {
 
+                validateOpponentPlayerName(
+                        request.getPlayerid(),
+                        session.getOPlayerId()
+                );
+
                 session.setXPlayerId(
                         request.getPlayerid()
                 );
@@ -259,6 +265,11 @@ public class GameService {
                 );
 
             } else {
+
+                validateOpponentPlayerName(
+                        request.getPlayerid(),
+                        session.getXPlayerId()
+                );
 
                 session.setOPlayerId(
                         request.getPlayerid()
@@ -377,6 +388,18 @@ public class GameService {
 
             throw new RecordSaveException(
                     "Record could not be saved"
+            );
+        }
+    }
+
+    private void validateOpponentPlayerName(
+            String playerId,
+            String opponentPlayerId) {
+
+        if (opponentPlayerId != null
+                && playerId.equalsIgnoreCase(opponentPlayerId)) {
+            throw new PlayerNameConflictException(
+                    "Player name is already being used in this room."
             );
         }
     }
