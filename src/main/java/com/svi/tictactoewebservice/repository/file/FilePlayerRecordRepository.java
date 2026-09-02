@@ -11,7 +11,11 @@ public class FilePlayerRecordRepository implements PlayerRecordRepository {
 
     @Override
     public void saveGameId(String playerId, String gameId) {
-        File file = FileUtil.getRecordFile(playerId);
+        if (findGameIdsByPlayerId(playerId).contains(gameId)) {
+            return;
+        }
+
+        File file = FileUtil.getPlayerFile(playerId);
 
         try (BufferedWriter writer = new BufferedWriter(
                 new FileWriter(file, true))) {
@@ -26,7 +30,7 @@ public class FilePlayerRecordRepository implements PlayerRecordRepository {
 
     @Override
     public List<String> findGameIdsByPlayerId(String playerId) {
-        File file = FileUtil.getRecordFile(playerId);
+        File file = FileUtil.getPlayerFile(playerId);
         List<String> gameIds = new ArrayList<>();
 
         if (!file.exists()) {
@@ -51,6 +55,6 @@ public class FilePlayerRecordRepository implements PlayerRecordRepository {
 
     @Override
     public boolean existsByPlayerId(String playerId) {
-        return FileUtil.getRecordFile(playerId).exists();
+        return FileUtil.getPlayerFile(playerId).exists();
     }
 }

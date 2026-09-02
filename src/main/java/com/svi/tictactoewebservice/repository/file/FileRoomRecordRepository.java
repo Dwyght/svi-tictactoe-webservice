@@ -1,0 +1,67 @@
+package com.svi.tictactoewebservice.repository.file;
+
+import com.svi.tictactoewebservice.repository.RoomRecordRepository;
+import com.svi.tictactoewebservice.util.FileUtil;
+
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+
+public class FileRoomRecordRepository implements RoomRecordRepository {
+
+    @Override
+    public void saveGameId(String roomId, String gameId) {
+        if (findGameIdsByRoomId(roomId).contains(gameId)) {
+            return;
+        }
+
+        File file = FileUtil.getRoomFile(roomId);
+
+        try (BufferedWriter writer = new BufferedWriter(
+                new FileWriter(file, true))) {
+
+            writer.write(gameId);
+            writer.newLine();
+
+        } catch (IOException e) {
+            throw new RuntimeException("Could not save room record.", e);
+        }
+    }
+
+    @Override
+    public List<String> findGameIdsByRoomId(String roomId) {
+        File file = FileUtil.getRoomFile(roomId);
+        List<String> gameIds = new ArrayList<>();
+
+        if (!file.exists()) {
+            return gameIds;
+        }
+
+        try (BufferedReader reader = new BufferedReader(
+                new FileReader(file))) {
+
+            String line;
+
+            while ((line = reader.readLine()) != null) {
+                if (!line.trim().isEmpty()) {
+                    gameIds.add(line);
+                }
+            }
+
+        } catch (IOException e) {
+            throw new RuntimeException("Could not read room records.", e);
+        }
+
+        return gameIds;
+    }
+
+    @Override
+    public boolean existsByRoomId(String roomId) {
+        return FileUtil.getRoomFile(roomId).exists();
+    }
+}

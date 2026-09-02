@@ -12,6 +12,7 @@ import com.svi.tictactoewebservice.model.MoveRecord;
 import com.svi.tictactoewebservice.repository.GameRecordRepository;
 import com.svi.tictactoewebservice.repository.GameSessionRepository;
 import com.svi.tictactoewebservice.repository.PlayerRecordRepository;
+import com.svi.tictactoewebservice.repository.RoomRecordRepository;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -20,19 +21,20 @@ import java.util.UUID;
 
 public class GameService {
 
-    private static final String GAME_ID_SEPARATOR = "__";
-
     private final GameRecordRepository gameRecordRepository;
     private final PlayerRecordRepository playerRecordRepository;
+    private final RoomRecordRepository roomRecordRepository;
     private final GameSessionRepository gameSessionRepository;
 
     public GameService(
             GameRecordRepository gameRecordRepository,
             PlayerRecordRepository playerRecordRepository,
+            RoomRecordRepository roomRecordRepository,
             GameSessionRepository gameSessionRepository) {
 
         this.gameRecordRepository = gameRecordRepository;
         this.playerRecordRepository = playerRecordRepository;
+        this.roomRecordRepository = roomRecordRepository;
         this.gameSessionRepository = gameSessionRepository;
     }
 
@@ -117,6 +119,30 @@ public class GameService {
     }
 
     // ========================================
+    // GET ROOM GAMES
+    // ========================================
+
+    public List<GameId> getRoomGames(String roomId) {
+
+        if (!roomRecordRepository.existsByRoomId(roomId)) {
+            throw new RecordNotFoundException(
+                    "Record not found"
+            );
+        }
+
+        List<String> gameIds =
+                roomRecordRepository.findGameIdsByRoomId(roomId);
+
+        List<GameId> games = new ArrayList<>();
+
+        for (String gameId : gameIds) {
+            games.add(new GameId(gameId));
+        }
+
+        return games;
+    }
+
+    // ========================================
     // GET GAME DETAILS
     // ========================================
 
@@ -149,10 +175,7 @@ public class GameService {
 
         synchronized (session) {
 
-            String gameId =
-                    gameCode
-                            + GAME_ID_SEPARATOR
-                            + UUID.randomUUID().toString();
+            String gameId = UUID.randomUUID().toString();
 
             session.setCurrentGameId(gameId);
 
@@ -164,6 +187,7 @@ public class GameService {
             session.setOEmoteEventId(0);
 
             gameSessionRepository.save(session);
+            roomRecordRepository.saveGameId(gameCode, gameId);
 
             return gameId;
         }

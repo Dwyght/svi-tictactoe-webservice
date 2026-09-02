@@ -14,7 +14,7 @@ public class FileGameRecordRepository implements GameRecordRepository {
 
     @Override
     public void save(MoveRecord record) {
-        File file = FileUtil.getRecordFile(record.getGameid());
+        File file = FileUtil.getGameFile(record.getGameid());
 
         try (BufferedWriter writer = new BufferedWriter(
                 new FileWriter(file, true))) {
@@ -29,7 +29,7 @@ public class FileGameRecordRepository implements GameRecordRepository {
 
     @Override
     public List<String> findAllGameIds() {
-        File directory = FileUtil.getRecordsDirectory();
+        File directory = FileUtil.getGamesDirectory();
         File[] recordFiles = directory.listFiles(
                 file -> file.isFile()
                         && file.getName().endsWith(".txt")
@@ -59,7 +59,7 @@ public class FileGameRecordRepository implements GameRecordRepository {
 
     @Override
     public List<MoveRecord> findByGameId(String gameId) {
-        File file = FileUtil.getRecordFile(gameId);
+        File file = FileUtil.getGameFile(gameId);
         List<MoveRecord> records = new ArrayList<>();
 
         if (!file.exists()) {
@@ -84,7 +84,7 @@ public class FileGameRecordRepository implements GameRecordRepository {
 
     @Override
     public boolean existsByGameId(String gameId) {
-        return FileUtil.getRecordFile(gameId).exists();
+        return FileUtil.getGameFile(gameId).exists();
     }
 
     private String toLine(MoveRecord record) {
