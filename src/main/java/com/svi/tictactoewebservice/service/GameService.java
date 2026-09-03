@@ -13,7 +13,6 @@ import com.svi.tictactoewebservice.model.GameSession;
 import com.svi.tictactoewebservice.repository.GameRecordRepository;
 import com.svi.tictactoewebservice.repository.GameSessionRepository;
 import com.svi.tictactoewebservice.repository.PlayerRecordRepository;
-import com.svi.tictactoewebservice.repository.RoomRecordRepository;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
@@ -28,7 +27,7 @@ public class GameService {
 
     private final GameRecordRepository gameRecordRepository;
     private final PlayerRecordRepository playerRecordRepository;
-    private final RoomRecordRepository roomRecordRepository;
+    private final RoomService roomService;
     private final GameSessionRepository gameSessionRepository;
 
     // Required so CDI can create a client proxy for this application-scoped bean.
@@ -40,11 +39,11 @@ public class GameService {
     public GameService(
             GameRecordRepository gameRecordRepository,
             PlayerRecordRepository playerRecordRepository,
-            RoomRecordRepository roomRecordRepository,
+            RoomService roomService,
             GameSessionRepository gameSessionRepository) {
         this.gameRecordRepository = gameRecordRepository;
         this.playerRecordRepository = playerRecordRepository;
-        this.roomRecordRepository = roomRecordRepository;
+        this.roomService = roomService;
         this.gameSessionRepository = gameSessionRepository;
     }
 
@@ -70,7 +69,7 @@ public class GameService {
             try {
                 gameRecordRepository.save(game);
                 playerRecordRepository.saveGameId(request.getPlayerid(), request.getGameid());
-                roomRecordRepository.saveGameId(request.getRoomid(), request.getGameid());
+                roomService.recordGameForRoom(request.getRoomid(), request.getGameid());
             } catch (RuntimeException e) {
                 throw new RecordSaveException("Record could not be saved", e);
             }
@@ -107,43 +106,6 @@ public class GameService {
         }
 
         List<String> gameIds = playerRecordRepository.findGameIdsByPlayerId(playerId);
-        List<GameId> games = new ArrayList<>();
-
-        for (String gameId : gameIds) {
-            games.add(new GameId(gameId));
-        }
-
-        return games;
-    }
-
-    // ========================================
-    // GET ALL ROOMS
-    // ========================================
-    public List<GameId> getAllRooms() {
-        List<String> roomIds = roomRecordRepository.findAllRoomIds();
-
-        if (roomIds.isEmpty()) {
-            throw new RecordNotFoundException("Record not found");
-        }
-
-        List<GameId> rooms = new ArrayList<>();
-
-        for (String roomId : roomIds) {
-            rooms.add(new GameId(roomId));
-        }
-
-        return rooms;
-    }
-
-    // ========================================
-    // GET ROOM GAMES
-    // ========================================
-    public List<GameId> getRoomGames(String roomId) {
-        if (!roomRecordRepository.existsByRoomId(roomId)) {
-            throw new RecordNotFoundException("Record not found");
-        }
-
-        List<String> gameIds = roomRecordRepository.findGameIdsByRoomId(roomId);
         List<GameId> games = new ArrayList<>();
 
         for (String gameId : gameIds) {

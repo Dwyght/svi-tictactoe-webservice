@@ -13,6 +13,7 @@ import com.svi.tictactoewebservice.model.Game;
 import com.svi.tictactoewebservice.model.GameId;
 import com.svi.tictactoewebservice.model.GameSession;
 import com.svi.tictactoewebservice.service.GameService;
+import com.svi.tictactoewebservice.service.RoomService;
 
 import javax.enterprise.context.RequestScoped;
 import javax.inject.Inject;
@@ -35,6 +36,9 @@ public class GameController {
 
     @Inject
     private GameService gameService;
+
+    @Inject
+    private RoomService roomService;
 
     // ========================================
     // SAVE MOVE
@@ -77,7 +81,7 @@ public class GameController {
     @GET
     @Path("/rooms")
     public Response getAllRooms() {
-        List<GameId> rooms = gameService.getAllRooms();
+        List<GameId> rooms = roomService.getAllRooms();
         return Response.ok(new GameListResponse(rooms, "Records found")).build();
     }
 
@@ -88,7 +92,7 @@ public class GameController {
     @GET
     @Path("/room/{roomId}/games")
     public Response getRoomGames(@PathParam("roomId") String roomId) {
-        List<GameId> games = gameService.getRoomGames(roomId);
+        List<GameId> games = roomService.getRoomGames(roomId);
         return Response.ok(new GameListResponse(games, "Records found")).build();
     }
 
