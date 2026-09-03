@@ -17,12 +17,9 @@ public class FilePlayerRecordRepository implements PlayerRecordRepository {
 
         File file = FileUtil.getPlayerFile(playerId);
 
-        try (BufferedWriter writer = new BufferedWriter(
-                new FileWriter(file, true))) {
-
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(file, true))) {
             writer.write(gameId);
             writer.newLine();
-
         } catch (IOException e) {
             throw new RuntimeException("Could not save player record.", e);
         }
@@ -37,15 +34,11 @@ public class FilePlayerRecordRepository implements PlayerRecordRepository {
             return gameIds;
         }
 
-        try (BufferedReader reader = new BufferedReader(
-                new FileReader(file))) {
-
+        try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
             String line;
-
             while ((line = reader.readLine()) != null) {
                 gameIds.add(line);
             }
-
         } catch (IOException e) {
             throw new RuntimeException("Could not read player records.", e);
         }

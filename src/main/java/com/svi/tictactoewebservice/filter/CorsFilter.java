@@ -13,57 +13,35 @@ import javax.ws.rs.ext.Provider;
 
 @Provider
 @PreMatching
-public class CorsFilter
-        implements ContainerRequestFilter, ContainerResponseFilter {
+public class CorsFilter implements ContainerRequestFilter, ContainerResponseFilter {
 
-    private static final String LOCALHOST_ORIGIN =
-            "http://localhost:5500";
-    private static final String LOOPBACK_ORIGIN =
-            "http://127.0.0.1:5500";
+    private static final String LOCALHOST_ORIGIN = "http://localhost:5500";
+    private static final String LOOPBACK_ORIGIN = "http://127.0.0.1:5500";
 
     @Override
-    public void filter(ContainerRequestContext requestContext)
-            throws IOException {
-
+    public void filter(ContainerRequestContext requestContext) throws IOException {
         String origin = requestContext.getHeaderString("Origin");
 
-        if (HttpMethod.OPTIONS.equals(requestContext.getMethod())
-                && isAllowedOrigin(origin)) {
-
-            requestContext.abortWith(
-                    Response.ok()
-                            .header("Access-Control-Allow-Origin", origin)
-                            .header(
-                                    "Access-Control-Allow-Methods",
-                                    "GET, POST, OPTIONS"
-                            )
-                            .header(
-                                    "Access-Control-Allow-Headers",
-                                    "Content-Type, Accept"
-                            )
-                            .build()
-            );
+        if (HttpMethod.OPTIONS.equals(requestContext.getMethod()) && isAllowedOrigin(origin)) {
+            requestContext.abortWith(Response.ok()
+                    .header("Access-Control-Allow-Origin", origin)
+                    .header("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
+                    .header("Access-Control-Allow-Headers", "Content-Type, Accept")
+                    .build());
         }
     }
 
     @Override
-    public void filter(
-            ContainerRequestContext requestContext,
-            ContainerResponseContext responseContext)
-            throws IOException {
-
+    public void filter(ContainerRequestContext requestContext,
+            ContainerResponseContext responseContext) throws IOException {
         String origin = requestContext.getHeaderString("Origin");
 
         if (isAllowedOrigin(origin)) {
-            responseContext.getHeaders().putSingle(
-                    "Access-Control-Allow-Origin",
-                    origin
-            );
+            responseContext.getHeaders().putSingle("Access-Control-Allow-Origin", origin);
         }
     }
 
     private boolean isAllowedOrigin(String origin) {
-        return LOCALHOST_ORIGIN.equals(origin)
-                || LOOPBACK_ORIGIN.equals(origin);
+        return LOCALHOST_ORIGIN.equals(origin) || LOOPBACK_ORIGIN.equals(origin);
     }
 }

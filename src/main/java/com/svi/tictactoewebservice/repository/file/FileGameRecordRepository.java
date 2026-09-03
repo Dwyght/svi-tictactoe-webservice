@@ -16,12 +16,9 @@ public class FileGameRecordRepository implements GameRecordRepository {
     public void save(MoveRecord record) {
         File file = FileUtil.getGameFile(record.getGameid());
 
-        try (BufferedWriter writer = new BufferedWriter(
-                new FileWriter(file, true))) {
-
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(file, true))) {
             writer.write(toLine(record));
             writer.newLine();
-
         } catch (IOException e) {
             throw new RuntimeException("Could not save game record.", e);
         }
@@ -31,9 +28,7 @@ public class FileGameRecordRepository implements GameRecordRepository {
     public List<String> findAllGameIds() {
         File directory = FileUtil.getGamesDirectory();
         File[] recordFiles = directory.listFiles(
-                file -> file.isFile()
-                        && file.getName().endsWith(".txt")
-        );
+                file -> file.isFile() && file.getName().endsWith(".txt"));
 
         List<String> gameIds = new ArrayList<>();
 
@@ -41,10 +36,7 @@ public class FileGameRecordRepository implements GameRecordRepository {
             return gameIds;
         }
 
-        Arrays.sort(
-                recordFiles,
-                Comparator.comparing(File::getName)
-        );
+        Arrays.sort(recordFiles, Comparator.comparing(File::getName));
 
         for (File file : recordFiles) {
             String gameId = findGameId(file);
@@ -66,15 +58,11 @@ public class FileGameRecordRepository implements GameRecordRepository {
             return records;
         }
 
-        try (BufferedReader reader = new BufferedReader(
-                new FileReader(file))) {
-
+        try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
             String line;
-
             while ((line = reader.readLine()) != null) {
                 records.add(toMoveRecord(line));
             }
-
         } catch (IOException e) {
             throw new RuntimeException("Could not read game records.", e);
         }
@@ -97,16 +85,10 @@ public class FileGameRecordRepository implements GameRecordRepository {
 
     private String findGameId(File file) {
         String fileName = file.getName();
-        String expectedGameId = fileName.substring(
-                0,
-                fileName.length() - ".txt".length()
-        );
+        String expectedGameId = fileName.substring(0, fileName.length() - ".txt".length());
 
-        try (BufferedReader reader = new BufferedReader(
-                new FileReader(file))) {
-
+        try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
             String line;
-
             while ((line = reader.readLine()) != null) {
                 if (line.trim().isEmpty()) {
                     continue;
@@ -114,8 +96,7 @@ public class FileGameRecordRepository implements GameRecordRepository {
 
                 String[] values = line.split(",", -1);
 
-                if (values.length == 5
-                        && expectedGameId.equals(values[0])) {
+                if (values.length == 5 && expectedGameId.equals(values[0])) {
                     return expectedGameId;
                 }
 
@@ -123,24 +104,13 @@ public class FileGameRecordRepository implements GameRecordRepository {
             }
 
             return null;
-
         } catch (IOException e) {
-            throw new RuntimeException(
-                    "Could not read game records.",
-                    e
-            );
+            throw new RuntimeException("Could not read game records.", e);
         }
     }
 
     private MoveRecord toMoveRecord(String line) {
         String[] values = line.split(",", -1);
-
-        return new MoveRecord(
-                values[0],
-                values[1],
-                values[2],
-                values[3],
-                values[4]
-        );
+        return new MoveRecord(values[0], values[1], values[2], values[3], values[4]);
     }
 }

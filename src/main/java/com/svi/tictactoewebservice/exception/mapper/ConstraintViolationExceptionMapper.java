@@ -14,13 +14,10 @@ public class ConstraintViolationExceptionMapper
         implements ExceptionMapper<ConstraintViolationException> {
 
     @Override
-    public Response toResponse(
-            ConstraintViolationException exception) {
-
+    public Response toResponse(ConstraintViolationException exception) {
         String message = "Request validation failed.";
 
-        for (ConstraintViolation<?> violation
-                : exception.getConstraintViolations()) {
+        for (ConstraintViolation<?> violation : exception.getConstraintViolations()) {
             message = violation.getMessage();
             break;
         }

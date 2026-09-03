@@ -32,7 +32,6 @@ public class GameService {
             PlayerRecordRepository playerRecordRepository,
             RoomRecordRepository roomRecordRepository,
             GameSessionRepository gameSessionRepository) {
-
         this.gameRecordRepository = gameRecordRepository;
         this.playerRecordRepository = playerRecordRepository;
         this.roomRecordRepository = roomRecordRepository;
@@ -44,45 +43,26 @@ public class GameService {
     // ========================================
 
     public void save(SaveRequest request) {
-
         validateSaveRequest(request);
-
         GameSession session = getSessionForSave(request);
-
         MoveRecord record = new MoveRecord(
                 request.getGameid(),
                 request.getPlayerid(),
                 request.getSymbol(),
                 request.getLocation(),
-                request.getDatesave()
-        );
+                request.getDatesave());
 
         synchronized (session) {
-            if (!request.getGameid().equals(
-                    session.getCurrentGameId())) {
-                throw new RecordSaveException(
-                        "Record could not be saved"
-                );
+            if (!request.getGameid().equals(session.getCurrentGameId())) {
+                throw new RecordSaveException("Record could not be saved");
             }
 
             try {
                 gameRecordRepository.save(record);
-
-                playerRecordRepository.saveGameId(
-                        request.getPlayerid(),
-                        request.getGameid()
-                );
-
-                roomRecordRepository.saveGameId(
-                        request.getRoomid(),
-                        request.getGameid()
-                );
-
+                playerRecordRepository.saveGameId(request.getPlayerid(), request.getGameid());
+                roomRecordRepository.saveGameId(request.getRoomid(), request.getGameid());
             } catch (RuntimeException e) {
-                throw new RecordSaveException(
-                        "Record could not be saved",
-                        e
-                );
+                throw new RecordSaveException("Record could not be saved", e);
             }
         }
     }
@@ -92,14 +72,10 @@ public class GameService {
     // ========================================
 
     public List<GameId> getAllGames() {
-
-        List<String> gameIds =
-                gameRecordRepository.findAllGameIds();
+        List<String> gameIds = gameRecordRepository.findAllGameIds();
 
         if (gameIds.isEmpty()) {
-            throw new RecordNotFoundException(
-                    "Record not found"
-            );
+            throw new RecordNotFoundException("Record not found");
         }
 
         List<GameId> games = new ArrayList<>();
@@ -116,16 +92,11 @@ public class GameService {
     // ========================================
 
     public List<GameId> getPlayerGames(String playerId) {
-
         if (!playerRecordRepository.existsByPlayerId(playerId)) {
-            throw new RecordNotFoundException(
-                    "Record not found"
-            );
+            throw new RecordNotFoundException("Record not found");
         }
 
-        List<String> gameIds =
-                playerRecordRepository.findGameIdsByPlayerId(playerId);
-
+        List<String> gameIds = playerRecordRepository.findGameIdsByPlayerId(playerId);
         List<GameId> games = new ArrayList<>();
 
         for (String gameId : gameIds) {
@@ -138,16 +109,11 @@ public class GameService {
     // ========================================
     // GET ALL ROOMS
     // ========================================
-
     public List<GameId> getAllRooms() {
-
-        List<String> roomIds =
-                roomRecordRepository.findAllRoomIds();
+        List<String> roomIds = roomRecordRepository.findAllRoomIds();
 
         if (roomIds.isEmpty()) {
-            throw new RecordNotFoundException(
-                    "Record not found"
-            );
+            throw new RecordNotFoundException("Record not found");
         }
 
         List<GameId> rooms = new ArrayList<>();
@@ -162,18 +128,12 @@ public class GameService {
     // ========================================
     // GET ROOM GAMES
     // ========================================
-
     public List<GameId> getRoomGames(String roomId) {
-
         if (!roomRecordRepository.existsByRoomId(roomId)) {
-            throw new RecordNotFoundException(
-                    "Record not found"
-            );
+            throw new RecordNotFoundException("Record not found");
         }
 
-        List<String> gameIds =
-                roomRecordRepository.findGameIdsByRoomId(roomId);
-
+        List<String> gameIds = roomRecordRepository.findGameIdsByRoomId(roomId);
         List<GameId> games = new ArrayList<>();
 
         for (String gameId : gameIds) {
@@ -186,21 +146,13 @@ public class GameService {
     // ========================================
     // GET GAME DETAILS
     // ========================================
-
     public List<MoveRecord> getGame(String gameId) {
-
         if (!gameRecordRepository.existsByGameId(gameId)) {
-            throw new RecordNotFoundException(
-                    "Record not found"
-            );
+            throw new RecordNotFoundException("Record not found");
         }
 
-        List<MoveRecord> records =
-                gameRecordRepository.findByGameId(gameId);
-
-        records.sort(
-                Comparator.comparing(MoveRecord::getDatesave)
-        );
+        List<MoveRecord> records = gameRecordRepository.findByGameId(gameId);
+        records.sort(Comparator.comparing(MoveRecord::getDatesave));
 
         return records;
     }
@@ -208,22 +160,16 @@ public class GameService {
     // ========================================
     // CREATE NEW ROUND / GAME ID
     // ========================================
-
     public String createGameId(String gameCode) {
-
-        GameSession session =
-                gameSessionRepository.getOrCreate(gameCode);
+        GameSession session = gameSessionRepository.getOrCreate(gameCode);
 
         synchronized (session) {
-
             String gameId = UUID.randomUUID().toString();
-
             session.setCurrentGameId(gameId);
 
             // New round: old emotes should not carry over.
             session.setXEmoteId(null);
             session.setXEmoteEventId(0);
-
             session.setOEmoteId(null);
             session.setOEmoteEventId(0);
 
@@ -236,16 +182,11 @@ public class GameService {
     // ========================================
     // GET CURRENT GAME ID
     // ========================================
-
     public String getCurrentGameId(String gameCode) {
-
-        GameSession session =
-                getExistingSession(gameCode);
+        GameSession session = getExistingSession(gameCode);
 
         if (session.getCurrentGameId() == null) {
-            throw new RecordNotFoundException(
-                    "Record not found"
-            );
+            throw new RecordNotFoundException("Record not found");
         }
 
         return session.getCurrentGameId();
@@ -254,46 +195,18 @@ public class GameService {
     // ========================================
     // REGISTER / UPDATE PLAYER
     // ========================================
-
-    public void registerPlayer(
-            String gameCode,
-            PlayerSessionRequest request) {
-
-        GameSession session =
-                gameSessionRepository.getOrCreate(gameCode);
+    public void registerPlayer(String gameCode, PlayerSessionRequest request) {
+        GameSession session = gameSessionRepository.getOrCreate(gameCode);
 
         synchronized (session) {
-
             if ("X".equals(request.getSymbol())) {
-
-                validateOpponentPlayerName(
-                        request.getPlayerid(),
-                        session.getOPlayerId()
-                );
-
-                session.setXPlayerId(
-                        request.getPlayerid()
-                );
-
-                session.setXSushiId(
-                        request.getSushiid()
-                );
-
+                validateOpponentPlayerName(request.getPlayerid(), session.getOPlayerId());
+                session.setXPlayerId(request.getPlayerid());
+                session.setXSushiId(request.getSushiid());
             } else {
-
-                validateOpponentPlayerName(
-                        request.getPlayerid(),
-                        session.getXPlayerId()
-                );
-
-                session.setOPlayerId(
-                        request.getPlayerid()
-                );
-
-                session.setOSushiId(
-                        request.getSushiid()
-                );
-
+                validateOpponentPlayerName(request.getPlayerid(), session.getXPlayerId());
+                session.setOPlayerId(request.getPlayerid());
+                session.setOSushiId(request.getSushiid());
             }
 
             gameSessionRepository.save(session);
@@ -303,16 +216,10 @@ public class GameService {
     // ========================================
     // UPDATE SCORE
     // ========================================
-
-    public void updateScore(
-            String gameCode,
-            ScoreRequest request) {
-
-        GameSession session =
-                getExistingSession(gameCode);
+    public void updateScore(String gameCode, ScoreRequest request) {
+        GameSession session = getExistingSession(gameCode);
 
         synchronized (session) {
-
             session.setXScore(request.getXscore());
             session.setOScore(request.getOscore());
 
@@ -323,37 +230,19 @@ public class GameService {
     // ========================================
     // SEND EMOTE
     // ========================================
-
-    public void sendEmote(
-            String gameCode,
-            EmoteRequest request) {
-
-        GameSession session =
-                getExistingSession(gameCode);
+    public void sendEmote(String gameCode, EmoteRequest request) {
+        GameSession session = getExistingSession(gameCode);
 
         synchronized (session) {
-
-            long eventId =
-                    session.getEmoteSequence() + 1;
-
+            long eventId = session.getEmoteSequence() + 1;
             session.setEmoteSequence(eventId);
 
             if ("X".equals(request.getSymbol())) {
-
-                session.setXEmoteId(
-                        request.getEmoteid()
-                );
-
+                session.setXEmoteId(request.getEmoteid());
                 session.setXEmoteEventId(eventId);
-
             } else {
-
-                session.setOEmoteId(
-                        request.getEmoteid()
-                );
-
+                session.setOEmoteId(request.getEmoteid());
                 session.setOEmoteEventId(eventId);
-
             }
 
             gameSessionRepository.save(session);
@@ -363,74 +252,48 @@ public class GameService {
     // ========================================
     // GET FULL SESSION
     // ========================================
-
     public GameSession getSession(String gameCode) {
         return getExistingSession(gameCode);
     }
-
     // ========================================
     // HELPERS
     // ========================================
-
     private GameSession getExistingSession(String gameCode) {
-
-        GameSession session =
-                gameSessionRepository.findByGameCode(gameCode);
+        GameSession session = gameSessionRepository.findByGameCode(gameCode);
 
         if (session == null) {
-            throw new RecordNotFoundException(
-                    "Record not found"
-            );
+            throw new RecordNotFoundException("Record not found");
         }
 
         return session;
     }
 
     private void validateSaveRequest(SaveRequest request) {
-
         if (request == null) {
-            throw new RecordSaveException(
-                    "Record could not be saved"
-            );
+            throw new RecordSaveException("Record could not be saved");
         }
 
         if (isBlank(request.getRoomid())
                 || isBlank(request.getGameid())
-                || !request.getPlayerid()
-                .matches("^[A-Za-z0-9_-]{1,10}$")
+                || !request.getPlayerid().matches("^[A-Za-z0-9_-]{1,10}$")
                 || isBlank(request.getSymbol())
                 || isBlank(request.getLocation())
                 || isBlank(request.getDatesave())) {
-
-            throw new RecordSaveException(
-                    "Record could not be saved"
-            );
+            throw new RecordSaveException("Record could not be saved");
         }
     }
 
-    private void validateOpponentPlayerName(
-            String playerId,
-            String opponentPlayerId) {
-
-        if (opponentPlayerId != null
-                && playerId.equalsIgnoreCase(opponentPlayerId)) {
-            throw new PlayerNameConflictException(
-                    "Player name is already being used in this room."
-            );
+    private void validateOpponentPlayerName(String playerId, String opponentPlayerId) {
+        if (opponentPlayerId != null && playerId.equalsIgnoreCase(opponentPlayerId)) {
+            throw new PlayerNameConflictException("Player name is already being used in this room.");
         }
     }
 
     private GameSession getSessionForSave(SaveRequest request) {
-
-        GameSession session =
-                gameSessionRepository.findByGameCode(
-                        request.getRoomid()
-                );
+        GameSession session = gameSessionRepository.findByGameCode(request.getRoomid());
 
         if (session == null) {
-            throw new RecordSaveException(
-                    "Record could not be saved"
-            );
+            throw new RecordSaveException("Record could not be saved");
         }
 
         return session;

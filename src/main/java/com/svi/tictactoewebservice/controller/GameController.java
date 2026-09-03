@@ -41,25 +41,16 @@ public class GameController {
     private final GameService gameService;
 
     public GameController() {
-
-        GameRecordRepository gameRecordRepository =
-                new FileGameRecordRepository();
-
-        PlayerRecordRepository playerRecordRepository =
-                new FilePlayerRecordRepository();
-
-        RoomRecordRepository roomRecordRepository =
-                new FileRoomRecordRepository();
-
-        GameSessionRepository gameSessionRepository =
-                new InMemoryGameSessionRepository();
+        GameRecordRepository gameRecordRepository = new FileGameRecordRepository();
+        PlayerRecordRepository playerRecordRepository = new FilePlayerRecordRepository();
+        RoomRecordRepository roomRecordRepository = new FileRoomRecordRepository();
+        GameSessionRepository gameSessionRepository = new InMemoryGameSessionRepository();
 
         this.gameService = new GameService(
                 gameRecordRepository,
                 playerRecordRepository,
                 roomRecordRepository,
-                gameSessionRepository
-        );
+                gameSessionRepository);
     }
 
     // ========================================
@@ -70,12 +61,8 @@ public class GameController {
     @Path("/save")
     @Consumes(MediaType.APPLICATION_JSON)
     public Response save(SaveRequest request) {
-
         gameService.save(request);
-
-        return Response
-                .ok(new MessageResponse("Record saved."))
-                .build();
+        return Response.ok(new MessageResponse("Record saved.")).build();
     }
 
     // ========================================
@@ -85,16 +72,8 @@ public class GameController {
     @GET
     @Path("/games")
     public Response getAllGames() {
-
-        List<GameId> games =
-                gameService.getAllGames();
-
-        return Response
-                .ok(new GameListResponse(
-                        games,
-                        "Records found"
-                ))
-                .build();
+        List<GameId> games = gameService.getAllGames();
+        return Response.ok(new GameListResponse(games, "Records found")).build();
     }
 
     // ========================================
@@ -103,18 +82,9 @@ public class GameController {
 
     @GET
     @Path("/list-games/{playerId}")
-    public Response getPlayerGames(
-            @PathParam("playerId") String playerId) {
-
-        List<GameId> games =
-                gameService.getPlayerGames(playerId);
-
-        return Response
-                .ok(new GameListResponse(
-                        games,
-                        "Records found"
-                ))
-                .build();
+    public Response getPlayerGames(@PathParam("playerId") String playerId) {
+        List<GameId> games = gameService.getPlayerGames(playerId);
+        return Response.ok(new GameListResponse(games, "Records found")).build();
     }
 
     // ========================================
@@ -124,16 +94,8 @@ public class GameController {
     @GET
     @Path("/rooms")
     public Response getAllRooms() {
-
-        List<GameId> rooms =
-                gameService.getAllRooms();
-
-        return Response
-                .ok(new GameListResponse(
-                        rooms,
-                        "Records found"
-                ))
-                .build();
+        List<GameId> rooms = gameService.getAllRooms();
+        return Response.ok(new GameListResponse(rooms, "Records found")).build();
     }
 
     // ========================================
@@ -142,18 +104,9 @@ public class GameController {
 
     @GET
     @Path("/room/{roomId}/games")
-    public Response getRoomGames(
-            @PathParam("roomId") String roomId) {
-
-        List<GameId> games =
-                gameService.getRoomGames(roomId);
-
-        return Response
-                .ok(new GameListResponse(
-                        games,
-                        "Records found"
-                ))
-                .build();
+    public Response getRoomGames(@PathParam("roomId") String roomId) {
+        List<GameId> games = gameService.getRoomGames(roomId);
+        return Response.ok(new GameListResponse(games, "Records found")).build();
     }
 
     // ========================================
@@ -162,18 +115,9 @@ public class GameController {
 
     @GET
     @Path("/game/{gameId}")
-    public Response getGame(
-            @PathParam("gameId") String gameId) {
-
-        List<MoveRecord> records =
-                gameService.getGame(gameId);
-
-        return Response
-                .ok(new GameDetailsResponse(
-                        records,
-                        "Records found"
-                ))
-                .build();
+    public Response getGame(@PathParam("gameId") String gameId) {
+        List<MoveRecord> records = gameService.getGame(gameId);
+        return Response.ok(new GameDetailsResponse(records, "Records found")).build();
     }
 
     // ========================================
@@ -182,15 +126,9 @@ public class GameController {
 
     @POST
     @Path("/session/{gameCode}/game")
-    public Response createGameId(
-            @PathParam("gameCode") String gameCode) {
-
-        String gameId =
-                gameService.createGameId(gameCode);
-
-        return Response
-                .ok(new GameIdResponse(gameId))
-                .build();
+    public Response createGameId(@PathParam("gameCode") String gameCode) {
+        String gameId = gameService.createGameId(gameCode);
+        return Response.ok(new GameIdResponse(gameId)).build();
     }
 
     // ========================================
@@ -199,15 +137,9 @@ public class GameController {
 
     @GET
     @Path("/session/{gameCode}/game")
-    public Response getCurrentGameId(
-            @PathParam("gameCode") String gameCode) {
-
-        String gameId =
-                gameService.getCurrentGameId(gameCode);
-
-        return Response
-                .ok(new GameIdResponse(gameId))
-                .build();
+    public Response getCurrentGameId(@PathParam("gameCode") String gameCode) {
+        String gameId = gameService.getCurrentGameId(gameCode);
+        return Response.ok(new GameIdResponse(gameId)).build();
     }
 
     // ========================================
@@ -217,20 +149,10 @@ public class GameController {
     @POST
     @Path("/session/{gameCode}/player")
     @Consumes(MediaType.APPLICATION_JSON)
-    public Response registerPlayer(
-            @PathParam("gameCode") String gameCode,
+    public Response registerPlayer(@PathParam("gameCode") String gameCode,
             @Valid PlayerSessionRequest request) {
-
-        gameService.registerPlayer(
-                gameCode,
-                request
-        );
-
-        return Response
-                .ok(new MessageResponse(
-                        "Player registered."
-                ))
-                .build();
+        gameService.registerPlayer(gameCode, request);
+        return Response.ok(new MessageResponse("Player registered.")).build();
     }
 
     // ========================================
@@ -240,20 +162,10 @@ public class GameController {
     @POST
     @Path("/session/{gameCode}/score")
     @Consumes(MediaType.APPLICATION_JSON)
-    public Response updateScore(
-            @PathParam("gameCode") String gameCode,
+    public Response updateScore(@PathParam("gameCode") String gameCode,
             @Valid ScoreRequest request) {
-
-        gameService.updateScore(
-                gameCode,
-                request
-        );
-
-        return Response
-                .ok(new MessageResponse(
-                        "Score updated."
-                ))
-                .build();
+        gameService.updateScore(gameCode, request);
+        return Response.ok(new MessageResponse("Score updated.")).build();
     }
 
     // ========================================
@@ -263,20 +175,10 @@ public class GameController {
     @POST
     @Path("/session/{gameCode}/emote")
     @Consumes(MediaType.APPLICATION_JSON)
-    public Response sendEmote(
-            @PathParam("gameCode") String gameCode,
+    public Response sendEmote(@PathParam("gameCode") String gameCode,
             @Valid EmoteRequest request) {
-
-        gameService.sendEmote(
-                gameCode,
-                request
-        );
-
-        return Response
-                .ok(new MessageResponse(
-                        "Emote sent."
-                ))
-                .build();
+        gameService.sendEmote(gameCode, request);
+        return Response.ok(new MessageResponse("Emote sent.")).build();
     }
 
     // ========================================
@@ -285,14 +187,8 @@ public class GameController {
 
     @GET
     @Path("/session/{gameCode}")
-    public Response getSession(
-            @PathParam("gameCode") String gameCode) {
-
-        GameSession session =
-                gameService.getSession(gameCode);
-
-        return Response
-                .ok(new GameSessionResponse(session))
-                .build();
+    public Response getSession(@PathParam("gameCode") String gameCode) {
+        GameSession session = gameService.getSession(gameCode);
+        return Response.ok(new GameSessionResponse(session)).build();
     }
 }

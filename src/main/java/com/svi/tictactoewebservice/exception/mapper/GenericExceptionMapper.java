@@ -22,9 +22,7 @@ public class GenericExceptionMapper
         return Response
                 .status(Response.Status.INTERNAL_SERVER_ERROR)
                 .type(MediaType.APPLICATION_JSON)
-                .entity(new MessageResponse(
-                        "The server ran into an unexpected exception."
-                ))
+                .entity(new MessageResponse("The server ran into an unexpected exception."))
                 .build();
     }
 }

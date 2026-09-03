@@ -24,12 +24,9 @@ public class FileRoomRecordRepository implements RoomRecordRepository {
 
         File file = FileUtil.getRoomFile(roomId);
 
-        try (BufferedWriter writer = new BufferedWriter(
-                new FileWriter(file, true))) {
-
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(file, true))) {
             writer.write(gameId);
             writer.newLine();
-
         } catch (IOException e) {
             throw new RuntimeException("Could not save room record.", e);
         }
@@ -39,9 +36,7 @@ public class FileRoomRecordRepository implements RoomRecordRepository {
     public List<String> findAllRoomIds() {
         File directory = FileUtil.getRoomsDirectory();
         File[] recordFiles = directory.listFiles(
-                file -> file.isFile()
-                        && file.getName().endsWith(".txt")
-        );
+                file -> file.isFile() && file.getName().endsWith(".txt"));
 
         List<String> roomIds = new ArrayList<>();
 
@@ -49,17 +44,11 @@ public class FileRoomRecordRepository implements RoomRecordRepository {
             return roomIds;
         }
 
-        Arrays.sort(
-                recordFiles,
-                Comparator.comparing(File::getName)
-        );
+        Arrays.sort(recordFiles, Comparator.comparing(File::getName));
 
         for (File file : recordFiles) {
             String fileName = file.getName();
-            roomIds.add(fileName.substring(
-                    0,
-                    fileName.length() - ".txt".length()
-            ));
+            roomIds.add(fileName.substring(0, fileName.length() - ".txt".length()));
         }
 
         return roomIds;
@@ -74,17 +63,13 @@ public class FileRoomRecordRepository implements RoomRecordRepository {
             return gameIds;
         }
 
-        try (BufferedReader reader = new BufferedReader(
-                new FileReader(file))) {
-
+        try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
             String line;
-
             while ((line = reader.readLine()) != null) {
                 if (!line.trim().isEmpty()) {
                     gameIds.add(line);
                 }
             }
-
         } catch (IOException e) {
             throw new RuntimeException("Could not read room records.", e);
         }

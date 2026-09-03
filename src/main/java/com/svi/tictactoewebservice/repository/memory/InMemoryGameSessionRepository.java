@@ -6,30 +6,21 @@ import com.svi.tictactoewebservice.repository.GameSessionRepository;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class InMemoryGameSessionRepository
-        implements GameSessionRepository {
+public class InMemoryGameSessionRepository implements GameSessionRepository {
 
-    private static final Map<String, GameSession> SESSIONS =
-            new ConcurrentHashMap<>();
+    private static final Map<String, GameSession> SESSIONS = new ConcurrentHashMap<>();
 
     @Override
     public GameSession getOrCreate(String gameCode) {
-
-        GameSession existingSession =
-                SESSIONS.get(gameCode);
+        GameSession existingSession = SESSIONS.get(gameCode);
 
         if (existingSession != null) {
             return existingSession;
         }
 
-        GameSession newSession =
-                new GameSession(gameCode);
+        GameSession newSession = new GameSession(gameCode);
 
-        GameSession previousSession =
-                SESSIONS.putIfAbsent(
-                        gameCode,
-                        newSession
-                );
+        GameSession previousSession = SESSIONS.putIfAbsent(gameCode, newSession);
 
         if (previousSession != null) {
             return previousSession;
@@ -45,9 +36,6 @@ public class InMemoryGameSessionRepository
 
     @Override
     public void save(GameSession session) {
-        SESSIONS.put(
-                session.getGameCode(),
-                session
-        );
+        SESSIONS.put(session.getGameCode(), session);
     }
 }
