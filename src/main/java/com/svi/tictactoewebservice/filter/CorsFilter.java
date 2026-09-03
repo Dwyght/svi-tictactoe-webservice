@@ -1,6 +1,11 @@
 package com.svi.tictactoewebservice.filter;
 
+import com.svi.tictactoewebservice.config.Config;
+
 import java.io.IOException;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
 
 import javax.ws.rs.HttpMethod;
 import javax.ws.rs.container.ContainerRequestContext;
@@ -15,8 +20,7 @@ import javax.ws.rs.ext.Provider;
 @PreMatching
 public class CorsFilter implements ContainerRequestFilter, ContainerResponseFilter {
 
-    private static final String LOCALHOST_ORIGIN = "http://localhost:5500";
-    private static final String LOOPBACK_ORIGIN = "http://127.0.0.1:5500";
+    private static volatile Set<String> allowedOrigins;
 
     @Override
     public void filter(ContainerRequestContext requestContext) throws IOException {
@@ -42,6 +46,37 @@ public class CorsFilter implements ContainerRequestFilter, ContainerResponseFilt
     }
 
     private boolean isAllowedOrigin(String origin) {
-        return LOCALHOST_ORIGIN.equals(origin) || LOOPBACK_ORIGIN.equals(origin);
+        return getAllowedOrigins().contains(origin);
+    }
+
+    private static Set<String> getAllowedOrigins() {
+        Set<String> origins = allowedOrigins;
+
+        if (origins == null) {
+            synchronized (CorsFilter.class) {
+                origins = allowedOrigins;
+
+                if (origins == null) {
+                    origins = parseAllowedOrigins();
+                    allowedOrigins = origins;
+                }
+            }
+        }
+
+        return origins;
+    }
+
+    private static Set<String> parseAllowedOrigins() {
+        Set<String> origins = new HashSet<>();
+
+        for (String configuredOrigin : Config.FRONTEND_URLS.getValue().split(",")) {
+            String origin = configuredOrigin.trim();
+
+            if (!origin.isEmpty()) {
+                origins.add(origin);
+            }
+        }
+
+        return Collections.unmodifiableSet(origins);
     }
 }

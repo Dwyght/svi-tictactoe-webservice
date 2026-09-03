@@ -6,7 +6,10 @@ import java.util.Properties;
 
 public enum Config {
 
-    RECORDS_DIRECTORY;
+    PLAYERS_DIRECTORY,
+    ROOMS_DIRECTORY,
+    GAMES_DIRECTORY,
+    FRONTEND_URLS;
 
     private static final Properties PROPERTIES = new Properties();
 

@@ -6,34 +6,24 @@ import java.io.File;
 
 public final class FileUtil {
 
-    private static final String PLAYERS_DIRECTORY = "players";
-    private static final String ROOMS_DIRECTORY = "rooms";
-    private static final String GAMES_DIRECTORY = "games";
-
     private FileUtil() {
-    }
-
-    public static File getRecordsDirectory() {
-        return getOrCreateDirectory(
-                new File(Config.RECORDS_DIRECTORY.getValue())
-        );
     }
 
     public static File getPlayersDirectory() {
         return getOrCreateDirectory(
-                new File(getRecordsDirectory(), PLAYERS_DIRECTORY)
+                new File(Config.PLAYERS_DIRECTORY.getValue())
         );
     }
 
     public static File getRoomsDirectory() {
         return getOrCreateDirectory(
-                new File(getRecordsDirectory(), ROOMS_DIRECTORY)
+                new File(Config.ROOMS_DIRECTORY.getValue())
         );
     }
 
     public static File getGamesDirectory() {
         return getOrCreateDirectory(
-                new File(getRecordsDirectory(), GAMES_DIRECTORY)
+                new File(Config.GAMES_DIRECTORY.getValue())
         );
     }
 
