@@ -1,6 +1,6 @@
 package com.svi.tictactoewebservice.repository.file;
 
-import com.svi.tictactoewebservice.model.MoveRecord;
+import com.svi.tictactoewebservice.model.Game;
 import com.svi.tictactoewebservice.repository.GameRecordRepository;
 import com.svi.tictactoewebservice.util.FileUtil;
 
@@ -19,14 +19,14 @@ public class FileGameRecordRepository implements GameRecordRepository {
     private final ConcurrentHashMap<String, Object> fileLocks = new ConcurrentHashMap<>();
 
     @Override
-    public void save(MoveRecord record) {
-        String gameId = record.getGameid();
+    public void save(Game game) {
+        String gameId = game.getGameid();
 
         synchronized (getFileLock(gameId)) {
             File file = FileUtil.getGameFile(gameId);
 
             try (BufferedWriter writer = new BufferedWriter(new FileWriter(file, true))) {
-                writer.write(toLine(record));
+                writer.write(toLine(game));
                 writer.newLine();
             } catch (IOException e) {
                 throw new RuntimeException("Could not save game record.", e);
@@ -60,25 +60,25 @@ public class FileGameRecordRepository implements GameRecordRepository {
     }
 
     @Override
-    public List<MoveRecord> findByGameId(String gameId) {
+    public List<Game> findByGameId(String gameId) {
         synchronized (getFileLock(gameId)) {
             File file = FileUtil.getGameFile(gameId);
-            List<MoveRecord> records = new ArrayList<>();
+            List<Game> games = new ArrayList<>();
 
             if (!file.exists()) {
-                return records;
+                return games;
             }
 
             try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
                 String line;
                 while ((line = reader.readLine()) != null) {
-                    records.add(toMoveRecord(line));
+                    games.add(toGame(line));
                 }
             } catch (IOException e) {
                 throw new RuntimeException("Could not read game records.", e);
             }
 
-            return records;
+            return games;
         }
     }
 
@@ -89,12 +89,12 @@ public class FileGameRecordRepository implements GameRecordRepository {
         }
     }
 
-    private String toLine(MoveRecord record) {
-        return record.getGameid() + ","
-                + record.getPlayerid() + ","
-                + record.getSymbol() + ","
-                + record.getLocation() + ","
-                + record.getDatesave();
+    private String toLine(Game game) {
+        return game.getGameid() + ","
+                + game.getPlayerid() + ","
+                + game.getSymbol() + ","
+                + game.getLocation() + ","
+                + game.getDatesave();
     }
 
     private String findGameId(File file) {
@@ -125,9 +125,9 @@ public class FileGameRecordRepository implements GameRecordRepository {
         }
     }
 
-    private MoveRecord toMoveRecord(String line) {
+    private Game toGame(String line) {
         String[] values = line.split(",", -1);
-        return new MoveRecord(values[0], values[1], values[2], values[3], values[4]);
+        return new Game(values[0], values[1], values[2], values[3], values[4]);
     }
 
     private Object getFileLock(String gameId) {

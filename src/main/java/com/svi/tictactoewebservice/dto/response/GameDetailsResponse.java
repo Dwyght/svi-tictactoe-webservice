@@ -1,13 +1,13 @@
 package com.svi.tictactoewebservice.dto.response;
 
-import com.svi.tictactoewebservice.model.MoveRecord;
+import com.svi.tictactoewebservice.model.Game;
 import javax.json.bind.annotation.JsonbProperty;
 import java.util.List;
 
 public class GameDetailsResponse {
 
     @JsonbProperty("list")
-    private List<MoveRecord> list;
+    private List<Game> list;
 
     @JsonbProperty("msg")
     private String msg;
@@ -15,16 +15,16 @@ public class GameDetailsResponse {
     public GameDetailsResponse() {
     }
 
-    public GameDetailsResponse(List<MoveRecord> list, String msg) {
+    public GameDetailsResponse(List<Game> list, String msg) {
         this.list = list;
         this.msg = msg;
     }
 
-    public List<MoveRecord> getList() {
+    public List<Game> getList() {
         return list;
     }
 
-    public void setList(List<MoveRecord> list) {
+    public void setList(List<Game> list) {
         this.list = list;
     }
 

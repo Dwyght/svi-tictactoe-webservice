@@ -9,9 +9,9 @@ import com.svi.tictactoewebservice.dto.response.GameIdResponse;
 import com.svi.tictactoewebservice.dto.response.GameListResponse;
 import com.svi.tictactoewebservice.dto.response.GameSessionResponse;
 import com.svi.tictactoewebservice.dto.response.MessageResponse;
+import com.svi.tictactoewebservice.model.Game;
 import com.svi.tictactoewebservice.model.GameId;
 import com.svi.tictactoewebservice.model.GameSession;
-import com.svi.tictactoewebservice.model.MoveRecord;
 import com.svi.tictactoewebservice.service.GameService;
 
 import javax.enterprise.context.RequestScoped;
@@ -99,7 +99,7 @@ public class GameController {
     @GET
     @Path("/game/{gameId}")
     public Response getGame(@PathParam("gameId") String gameId) {
-        List<MoveRecord> records = gameService.getGame(gameId);
+        List<Game> records = gameService.getGame(gameId);
         return Response.ok(new GameDetailsResponse(records, "Records found")).build();
     }
 

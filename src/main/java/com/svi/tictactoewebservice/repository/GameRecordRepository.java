@@ -1,13 +1,13 @@
 package com.svi.tictactoewebservice.repository;
 
-import com.svi.tictactoewebservice.model.MoveRecord;
+import com.svi.tictactoewebservice.model.Game;
 import java.util.List;
 
 public interface GameRecordRepository {
 
-    void save(MoveRecord record);
+    void save(Game game);
 
     List<String> findAllGameIds();
-    List<MoveRecord> findByGameId(String gameId);
+    List<Game> findByGameId(String gameId);
     boolean existsByGameId(String gameId);
 }

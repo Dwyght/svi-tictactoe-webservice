@@ -7,9 +7,9 @@ import com.svi.tictactoewebservice.dto.request.ScoreRequest;
 import com.svi.tictactoewebservice.exception.RecordNotFoundException;
 import com.svi.tictactoewebservice.exception.RecordSaveException;
 import com.svi.tictactoewebservice.exception.PlayerNameConflictException;
+import com.svi.tictactoewebservice.model.Game;
 import com.svi.tictactoewebservice.model.GameId;
 import com.svi.tictactoewebservice.model.GameSession;
-import com.svi.tictactoewebservice.model.MoveRecord;
 import com.svi.tictactoewebservice.repository.GameRecordRepository;
 import com.svi.tictactoewebservice.repository.GameSessionRepository;
 import com.svi.tictactoewebservice.repository.PlayerRecordRepository;
@@ -55,7 +55,7 @@ public class GameService {
     public void save(SaveRequest request) {
         validateSaveRequest(request);
         GameSession session = getSessionForSave(request);
-        MoveRecord record = new MoveRecord(
+        Game game = new Game(
                 request.getGameid(),
                 request.getPlayerid(),
                 request.getSymbol(),
@@ -68,7 +68,7 @@ public class GameService {
             }
 
             try {
-                gameRecordRepository.save(record);
+                gameRecordRepository.save(game);
                 playerRecordRepository.saveGameId(request.getPlayerid(), request.getGameid());
                 roomRecordRepository.saveGameId(request.getRoomid(), request.getGameid());
             } catch (RuntimeException e) {
@@ -156,13 +156,13 @@ public class GameService {
     // ========================================
     // GET GAME DETAILS
     // ========================================
-    public List<MoveRecord> getGame(String gameId) {
+    public List<Game> getGame(String gameId) {
         if (!gameRecordRepository.existsByGameId(gameId)) {
             throw new RecordNotFoundException("Record not found");
         }
 
-        List<MoveRecord> records = gameRecordRepository.findByGameId(gameId);
-        records.sort(Comparator.comparing(MoveRecord::getDatesave));
+        List<Game> records = gameRecordRepository.findByGameId(gameId);
+        records.sort(Comparator.comparing(Game::getDatesave));
 
         return records;
     }

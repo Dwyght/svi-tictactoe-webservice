@@ -1,6 +1,6 @@
 package com.svi.tictactoewebservice.model;
 
-public class MoveRecord {
+public class Game {
 
     private String gameid;
     private String playerid;
@@ -8,10 +8,10 @@ public class MoveRecord {
     private String location;
     private String datesave;
 
-    public MoveRecord() {
+    public Game() {
     }
 
-    public MoveRecord(
+    public Game(
             String gameid,
             String playerid,
             String symbol,
