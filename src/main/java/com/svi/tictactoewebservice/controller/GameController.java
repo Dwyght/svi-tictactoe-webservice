@@ -60,17 +60,6 @@ public class GameController {
     }
 
     // ========================================
-    // GET PLAYER GAMES
-    // ========================================
-
-    @GET
-    @Path("/list-games/{playerId}")
-    public Response getPlayerGames(@PathParam("playerId") String playerId) {
-        List<GameId> games = gameService.getPlayerGames(playerId);
-        return Response.ok(new GameListResponse(games, "Records found")).build();
-    }
-
-    // ========================================
     // GET GAME DETAILS
     // ========================================
 
