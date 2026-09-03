@@ -15,23 +15,30 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
 
 @ApplicationScoped
 public class FileRoomRecordRepository implements RoomRecordRepository {
 
+    private final ConcurrentHashMap<String, Object> fileLocks = new ConcurrentHashMap<>();
+
     @Override
     public void saveGameId(String roomId, String gameId) {
-        if (findGameIdsByRoomId(roomId).contains(gameId)) {
-            return;
-        }
+        synchronized (getFileLock(roomId)) {
+            List<String> gameIds = readGameIds(roomId);
 
-        File file = FileUtil.getRoomFile(roomId);
+            if (gameIds.contains(gameId)) {
+                return;
+            }
 
-        try (BufferedWriter writer = new BufferedWriter(new FileWriter(file, true))) {
-            writer.write(gameId);
-            writer.newLine();
-        } catch (IOException e) {
-            throw new RuntimeException("Could not save room record.", e);
+            File file = FileUtil.getRoomFile(roomId);
+
+            try (BufferedWriter writer = new BufferedWriter(new FileWriter(file, true))) {
+                writer.write(gameId);
+                writer.newLine();
+            } catch (IOException e) {
+                throw new RuntimeException("Could not save room record.", e);
+            }
         }
     }
 
@@ -59,6 +66,19 @@ public class FileRoomRecordRepository implements RoomRecordRepository {
 
     @Override
     public List<String> findGameIdsByRoomId(String roomId) {
+        synchronized (getFileLock(roomId)) {
+            return readGameIds(roomId);
+        }
+    }
+
+    @Override
+    public boolean existsByRoomId(String roomId) {
+        synchronized (getFileLock(roomId)) {
+            return FileUtil.getRoomFile(roomId).exists();
+        }
+    }
+
+    private List<String> readGameIds(String roomId) {
         File file = FileUtil.getRoomFile(roomId);
         List<String> gameIds = new ArrayList<>();
 
@@ -80,8 +100,7 @@ public class FileRoomRecordRepository implements RoomRecordRepository {
         return gameIds;
     }
 
-    @Override
-    public boolean existsByRoomId(String roomId) {
-        return FileUtil.getRoomFile(roomId).exists();
+    private Object getFileLock(String roomId) {
+        return fileLocks.computeIfAbsent(roomId, key -> new Object());
     }
 }
