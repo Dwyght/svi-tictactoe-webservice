@@ -3,16 +3,19 @@ package com.svi.tictactoewebservice.repository.memory;
 import com.svi.tictactoewebservice.model.GameSession;
 import com.svi.tictactoewebservice.repository.GameSessionRepository;
 
+import javax.enterprise.context.ApplicationScoped;
+
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+@ApplicationScoped
 public class InMemoryGameSessionRepository implements GameSessionRepository {
 
-    private static final Map<String, GameSession> SESSIONS = new ConcurrentHashMap<>();
+    private final Map<String, GameSession> sessions = new ConcurrentHashMap<>();
 
     @Override
     public GameSession getOrCreate(String gameCode) {
-        GameSession existingSession = SESSIONS.get(gameCode);
+        GameSession existingSession = sessions.get(gameCode);
 
         if (existingSession != null) {
             return existingSession;
@@ -20,7 +23,7 @@ public class InMemoryGameSessionRepository implements GameSessionRepository {
 
         GameSession newSession = new GameSession(gameCode);
 
-        GameSession previousSession = SESSIONS.putIfAbsent(gameCode, newSession);
+        GameSession previousSession = sessions.putIfAbsent(gameCode, newSession);
 
         if (previousSession != null) {
             return previousSession;
@@ -31,11 +34,11 @@ public class InMemoryGameSessionRepository implements GameSessionRepository {
 
     @Override
     public GameSession findByGameCode(String gameCode) {
-        return SESSIONS.get(gameCode);
+        return sessions.get(gameCode);
     }
 
     @Override
     public void save(GameSession session) {
-        SESSIONS.put(session.getGameCode(), session);
+        sessions.put(session.getGameCode(), session);
     }
 }

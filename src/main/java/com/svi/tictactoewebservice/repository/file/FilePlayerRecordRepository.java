@@ -3,10 +3,13 @@ package com.svi.tictactoewebservice.repository.file;
 import com.svi.tictactoewebservice.repository.PlayerRecordRepository;
 import com.svi.tictactoewebservice.util.FileUtil;
 
+import javax.enterprise.context.ApplicationScoped;
+
 import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 
+@ApplicationScoped
 public class FilePlayerRecordRepository implements PlayerRecordRepository {
 
     @Override

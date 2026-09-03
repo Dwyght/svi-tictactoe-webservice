@@ -12,16 +12,10 @@ import com.svi.tictactoewebservice.dto.response.MessageResponse;
 import com.svi.tictactoewebservice.model.GameId;
 import com.svi.tictactoewebservice.model.GameSession;
 import com.svi.tictactoewebservice.model.MoveRecord;
-import com.svi.tictactoewebservice.repository.GameRecordRepository;
-import com.svi.tictactoewebservice.repository.GameSessionRepository;
-import com.svi.tictactoewebservice.repository.PlayerRecordRepository;
-import com.svi.tictactoewebservice.repository.RoomRecordRepository;
-import com.svi.tictactoewebservice.repository.file.FileGameRecordRepository;
-import com.svi.tictactoewebservice.repository.file.FilePlayerRecordRepository;
-import com.svi.tictactoewebservice.repository.file.FileRoomRecordRepository;
-import com.svi.tictactoewebservice.repository.memory.InMemoryGameSessionRepository;
 import com.svi.tictactoewebservice.service.GameService;
 
+import javax.enterprise.context.RequestScoped;
+import javax.inject.Inject;
 import javax.validation.Valid;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
@@ -36,22 +30,11 @@ import java.util.List;
 
 @Path("/")
 @Produces(MediaType.APPLICATION_JSON)
+@RequestScoped
 public class GameController {
 
-    private final GameService gameService;
-
-    public GameController() {
-        GameRecordRepository gameRecordRepository = new FileGameRecordRepository();
-        PlayerRecordRepository playerRecordRepository = new FilePlayerRecordRepository();
-        RoomRecordRepository roomRecordRepository = new FileRoomRecordRepository();
-        GameSessionRepository gameSessionRepository = new InMemoryGameSessionRepository();
-
-        this.gameService = new GameService(
-                gameRecordRepository,
-                playerRecordRepository,
-                roomRecordRepository,
-                gameSessionRepository);
-    }
+    @Inject
+    private GameService gameService;
 
     // ========================================
     // SAVE MOVE

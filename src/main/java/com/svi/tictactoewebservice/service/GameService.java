@@ -15,11 +15,15 @@ import com.svi.tictactoewebservice.repository.GameSessionRepository;
 import com.svi.tictactoewebservice.repository.PlayerRecordRepository;
 import com.svi.tictactoewebservice.repository.RoomRecordRepository;
 
+import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Inject;
+
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.UUID;
 
+@ApplicationScoped
 public class GameService {
 
     private final GameRecordRepository gameRecordRepository;
@@ -27,6 +31,12 @@ public class GameService {
     private final RoomRecordRepository roomRecordRepository;
     private final GameSessionRepository gameSessionRepository;
 
+    // Required so CDI can create a client proxy for this application-scoped bean.
+    protected GameService() {
+        this(null, null, null, null);
+    }
+
+    @Inject
     public GameService(
             GameRecordRepository gameRecordRepository,
             PlayerRecordRepository playerRecordRepository,

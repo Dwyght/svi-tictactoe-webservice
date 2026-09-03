@@ -4,12 +4,15 @@ import com.svi.tictactoewebservice.model.MoveRecord;
 import com.svi.tictactoewebservice.repository.GameRecordRepository;
 import com.svi.tictactoewebservice.util.FileUtil;
 
+import javax.enterprise.context.ApplicationScoped;
+
 import java.io.*;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 
+@ApplicationScoped
 public class FileGameRecordRepository implements GameRecordRepository {
 
     @Override

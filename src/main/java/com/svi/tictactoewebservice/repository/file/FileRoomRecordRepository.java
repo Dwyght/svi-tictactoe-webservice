@@ -3,6 +3,8 @@ package com.svi.tictactoewebservice.repository.file;
 import com.svi.tictactoewebservice.repository.RoomRecordRepository;
 import com.svi.tictactoewebservice.util.FileUtil;
 
+import javax.enterprise.context.ApplicationScoped;
+
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
@@ -14,6 +16,7 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 
+@ApplicationScoped
 public class FileRoomRecordRepository implements RoomRecordRepository {
 
     @Override
