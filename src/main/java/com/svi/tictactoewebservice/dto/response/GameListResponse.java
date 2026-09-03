@@ -1,11 +1,15 @@
 package com.svi.tictactoewebservice.dto.response;
 
 import com.svi.tictactoewebservice.model.GameId;
+import javax.json.bind.annotation.JsonbProperty;
 import java.util.List;
 
 public class GameListResponse {
 
+    @JsonbProperty("list")
     private List<GameId> list;
+
+    @JsonbProperty("msg")
     private String msg;
 
     public GameListResponse() {

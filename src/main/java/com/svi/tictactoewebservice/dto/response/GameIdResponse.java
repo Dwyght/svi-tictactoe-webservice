@@ -1,7 +1,10 @@
 package com.svi.tictactoewebservice.dto.response;
 
+import javax.json.bind.annotation.JsonbProperty;
+
 public class GameIdResponse {
 
+    @JsonbProperty("gameid")
     private String gameid;
 
     public GameIdResponse() {

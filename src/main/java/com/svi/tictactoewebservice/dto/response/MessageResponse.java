@@ -1,7 +1,10 @@
 package com.svi.tictactoewebservice.dto.response;
 
+import javax.json.bind.annotation.JsonbProperty;
+
 public class MessageResponse {
 
+    @JsonbProperty("msg")
     private String msg;
 
     public MessageResponse() {

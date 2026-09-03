@@ -1,10 +1,12 @@
 package com.svi.tictactoewebservice.dto.request;
 
+import javax.json.bind.annotation.JsonbProperty;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Pattern;
 
 public class PlayerSessionRequest {
 
+    @JsonbProperty("playerid")
     @NotBlank(message = "Player ID is required.")
     @Pattern(
             regexp = "^[A-Za-z0-9_-]{1,10}$",
@@ -12,6 +14,7 @@ public class PlayerSessionRequest {
     )
     private String playerid;
 
+    @JsonbProperty("symbol")
     @NotBlank(message = "Symbol is required.")
     @Pattern(
             regexp = "^[XO]$",
@@ -19,6 +22,7 @@ public class PlayerSessionRequest {
     )
     private String symbol;
 
+    @JsonbProperty("sushiid")
     @NotBlank(message = "Sushi ID is required.")
     private String sushiid;
 

@@ -1,12 +1,25 @@
 package com.svi.tictactoewebservice.dto.request;
 
+import javax.json.bind.annotation.JsonbProperty;
+
 public class SaveRequest {
 
+    @JsonbProperty("roomid")
     private String roomid;
+
+    @JsonbProperty("gameid")
     private String gameid;
+
+    @JsonbProperty("playerid")
     private String playerid;
+
+    @JsonbProperty("symbol")
     private String symbol;
+
+    @JsonbProperty("location")
     private String location;
+
+    @JsonbProperty("datesave")
     private String datesave;
 
     public SaveRequest() {

@@ -2,24 +2,44 @@ package com.svi.tictactoewebservice.dto.response;
 
 import com.svi.tictactoewebservice.model.GameSession;
 
+import javax.json.bind.annotation.JsonbProperty;
+
 public class GameSessionResponse {
 
+    @JsonbProperty("gamecode")
     private String gamecode;
+
+    @JsonbProperty("gameid")
     private String gameid;
 
+    @JsonbProperty("xplayerid")
     private String xplayerid;
+
+    @JsonbProperty("xsushiid")
     private String xsushiid;
 
+    @JsonbProperty("oplayerid")
     private String oplayerid;
+
+    @JsonbProperty("osushiid")
     private String osushiid;
 
+    @JsonbProperty("xscore")
     private int xscore;
+
+    @JsonbProperty("oscore")
     private int oscore;
 
+    @JsonbProperty("xemoteid")
     private String xemoteid;
+
+    @JsonbProperty("xemoteeventid")
     private long xemoteeventid;
 
+    @JsonbProperty("oemoteid")
     private String oemoteid;
+
+    @JsonbProperty("oemoteeventid")
     private long oemoteeventid;
 
     public GameSessionResponse() {
