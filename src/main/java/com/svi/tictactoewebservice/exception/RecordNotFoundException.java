@@ -1,8 +1,10 @@
 package com.svi.tictactoewebservice.exception;
 
-public class RecordNotFoundException extends RuntimeException {
+import javax.ws.rs.core.Response;
+
+public class RecordNotFoundException extends ApiException {
 
     public RecordNotFoundException(String message) {
-        super(message);
+        super(Response.Status.PAYMENT_REQUIRED, message);
     }
 }

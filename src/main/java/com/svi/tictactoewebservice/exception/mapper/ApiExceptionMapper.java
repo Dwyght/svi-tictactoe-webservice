@@ -1,7 +1,7 @@
 package com.svi.tictactoewebservice.exception.mapper;
 
 import com.svi.tictactoewebservice.dto.response.MessageResponse;
-import com.svi.tictactoewebservice.exception.RecordSaveException;
+import com.svi.tictactoewebservice.exception.ApiException;
 
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -9,15 +9,14 @@ import javax.ws.rs.ext.ExceptionMapper;
 import javax.ws.rs.ext.Provider;
 
 @Provider
-public class RecordSaveExceptionMapper
-        implements ExceptionMapper<RecordSaveException> {
+public class ApiExceptionMapper implements ExceptionMapper<ApiException> {
 
     @Override
-    public Response toResponse(RecordSaveException exception) {
+    public Response toResponse(ApiException exception) {
         return Response
-                .status(401)
+                .status(exception.getStatus())
                 .type(MediaType.APPLICATION_JSON)
-                .entity(new MessageResponse("Record could not be saved"))
+                .entity(new MessageResponse(exception.getMessage()))
                 .build();
     }
 }

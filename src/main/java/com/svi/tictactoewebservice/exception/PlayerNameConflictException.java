@@ -1,8 +1,10 @@
 package com.svi.tictactoewebservice.exception;
 
-public class PlayerNameConflictException extends RuntimeException {
+import javax.ws.rs.core.Response;
+
+public class PlayerNameConflictException extends ApiException {
 
     public PlayerNameConflictException(String message) {
-        super(message);
+        super(Response.Status.CONFLICT, message);
     }
 }

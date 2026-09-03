@@ -1,12 +1,15 @@
 package com.svi.tictactoewebservice.exception;
 
-public class RecordSaveException extends RuntimeException {
+import javax.ws.rs.core.Response;
+
+public class RecordSaveException extends ApiException {
 
     public RecordSaveException(String message) {
-        super(message);
+        super(Response.Status.UNAUTHORIZED, message);
     }
 
     public RecordSaveException(String message, Throwable cause) {
-        super(message, cause);
+        super(Response.Status.UNAUTHORIZED, message);
+        initCause(cause);
     }
 }
