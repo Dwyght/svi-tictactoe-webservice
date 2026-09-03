@@ -1,5 +1,6 @@
-package com.svi.tictactoewebservice.config;
+package com.svi.tictactoewebservice.contextlistener;
 
+import com.svi.tictactoewebservice.config.Config;
 import com.svi.tictactoewebservice.util.FileUtil;
 
 import javax.servlet.ServletContext;
