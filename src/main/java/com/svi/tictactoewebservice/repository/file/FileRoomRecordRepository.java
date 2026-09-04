@@ -16,9 +16,14 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 @ApplicationScoped
 public class FileRoomRecordRepository implements RoomRecordRepository {
+
+    private static final Logger LOGGER =
+            Logger.getLogger(FileRoomRecordRepository.class.getName());
 
     private final ConcurrentHashMap<String, Object> fileLocks = new ConcurrentHashMap<>();
 
@@ -37,6 +42,11 @@ public class FileRoomRecordRepository implements RoomRecordRepository {
                 writer.write(gameId);
                 writer.newLine();
             } catch (IOException e) {
+                LOGGER.log(
+                        Level.SEVERE,
+                        "Failed to append game ID to room record '"
+                                + file.getAbsolutePath() + "'.",
+                        e);
                 throw new RuntimeException("Could not save room record.", e);
             }
         }
@@ -94,6 +104,11 @@ public class FileRoomRecordRepository implements RoomRecordRepository {
                 }
             }
         } catch (IOException e) {
+            LOGGER.log(
+                    Level.WARNING,
+                    "Failed to read game IDs from room record '"
+                            + file.getAbsolutePath() + "'.",
+                    e);
             throw new RuntimeException("Could not read room records.", e);
         }
 

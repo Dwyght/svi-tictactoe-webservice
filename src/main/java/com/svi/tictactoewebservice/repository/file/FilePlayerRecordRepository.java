@@ -9,9 +9,14 @@ import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 @ApplicationScoped
 public class FilePlayerRecordRepository implements PlayerRecordRepository {
+
+    private static final Logger LOGGER =
+            Logger.getLogger(FilePlayerRecordRepository.class.getName());
 
     private final ConcurrentHashMap<String, Object> fileLocks = new ConcurrentHashMap<>();
 
@@ -30,6 +35,11 @@ public class FilePlayerRecordRepository implements PlayerRecordRepository {
                 writer.write(gameId);
                 writer.newLine();
             } catch (IOException e) {
+                LOGGER.log(
+                        Level.SEVERE,
+                        "Failed to append game ID to player record '"
+                                + file.getAbsolutePath() + "'.",
+                        e);
                 throw new RuntimeException("Could not save player record.", e);
             }
         }
@@ -63,6 +73,11 @@ public class FilePlayerRecordRepository implements PlayerRecordRepository {
                 gameIds.add(line);
             }
         } catch (IOException e) {
+            LOGGER.log(
+                    Level.WARNING,
+                    "Failed to read game IDs from player record '"
+                            + file.getAbsolutePath() + "'.",
+                    e);
             throw new RuntimeException("Could not read player records.", e);
         }
 

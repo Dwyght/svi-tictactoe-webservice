@@ -34,6 +34,11 @@ public class FileGameRecordRepository implements GameRecordRepository {
                 writer.write(toLine(game));
                 writer.newLine();
             } catch (IOException e) {
+                LOGGER.log(
+                        Level.SEVERE,
+                        "Failed to append game record to '"
+                                + file.getAbsolutePath() + "'.",
+                        e);
                 throw new RuntimeException("Could not save game record.", e);
             }
         }
@@ -80,6 +85,11 @@ public class FileGameRecordRepository implements GameRecordRepository {
                     games.add(toGame(line));
                 }
             } catch (IOException e) {
+                LOGGER.log(
+                        Level.WARNING,
+                        "Failed to read game records from '"
+                                + file.getAbsolutePath() + "'.",
+                        e);
                 throw new RuntimeException("Could not read game records.", e);
             }
 
@@ -139,6 +149,11 @@ public class FileGameRecordRepository implements GameRecordRepository {
 
                 return expectedGameId;
             } catch (IOException e) {
+                LOGGER.log(
+                        Level.WARNING,
+                        "Failed to read and validate game record file '"
+                                + file.getAbsolutePath() + "'.",
+                        e);
                 throw new RuntimeException("Could not read game records.", e);
             }
         }

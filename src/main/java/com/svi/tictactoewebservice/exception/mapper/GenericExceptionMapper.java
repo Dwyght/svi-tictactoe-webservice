@@ -7,10 +7,15 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.ext.ExceptionMapper;
 import javax.ws.rs.ext.Provider;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 @Provider
 public class GenericExceptionMapper
         implements ExceptionMapper<Exception> {
+
+    private static final Logger LOGGER =
+            Logger.getLogger(GenericExceptionMapper.class.getName());
 
     @Override
     public Response toResponse(Exception exception) {
@@ -18,6 +23,11 @@ public class GenericExceptionMapper
         if (exception instanceof WebApplicationException) {
             return ((WebApplicationException) exception).getResponse();
         }
+
+        LOGGER.log(
+                Level.SEVERE,
+                "Unhandled exception reached the top-level exception mapper.",
+                exception);
 
         return Response
                 .status(Response.Status.INTERNAL_SERVER_ERROR)
