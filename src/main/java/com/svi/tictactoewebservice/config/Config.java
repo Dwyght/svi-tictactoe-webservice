@@ -4,6 +4,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
 
+/**
+ * Provides startup-loaded configuration values. The CORS allowlist originates here, but its
+ * thread-safe, double-checked cache is owned and safely published by {@code CorsFilter}.
+ */
 public enum Config {
 
     PLAYERS_DIRECTORY,

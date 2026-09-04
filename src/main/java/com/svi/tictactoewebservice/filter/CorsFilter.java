@@ -20,6 +20,10 @@ import javax.ws.rs.ext.Provider;
 @PreMatching
 public class CorsFilter implements ContainerRequestFilter, ContainerResponseFilter {
 
+    /**
+     * Volatile publication makes the immutable allowlist visible to every request thread after
+     * its one-time initialization in the synchronized portion of {@link #getAllowedOrigins()}.
+     */
     private static volatile Set<String> allowedOrigins;
 
     @Override
@@ -49,6 +53,11 @@ public class CorsFilter implements ContainerRequestFilter, ContainerResponseFilt
         return getAllowedOrigins().contains(origin);
     }
 
+    /**
+     * Uses double-checked locking so only first-time initialization takes the class lock; the
+     * second null check prevents duplicate initialization, and {@code volatile} makes later
+     * lock-free reads observe the fully constructed set.
+     */
     private static Set<String> getAllowedOrigins() {
         Set<String> origins = allowedOrigins;
 

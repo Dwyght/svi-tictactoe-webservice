@@ -21,6 +21,10 @@ public class FileGameRecordRepository implements GameRecordRepository {
     private static final Logger LOGGER =
             Logger.getLogger(FileGameRecordRepository.class.getName());
 
+    /**
+     * Maintains one lock per game ID so operations on different game files can proceed in
+     * parallel while concurrent writers to the same flat file cannot interleave move records.
+     */
     private final ConcurrentHashMap<String, Object> fileLocks = new ConcurrentHashMap<>();
 
     @Override
@@ -164,6 +168,10 @@ public class FileGameRecordRepository implements GameRecordRepository {
         return new Game(values[0], values[1], values[2], values[3], values[4]);
     }
 
+    /**
+     * Returns the shared monitor for a game ID; atomic map initialization ensures every thread
+     * targeting that game's file synchronizes on the same object.
+     */
     private Object getFileLock(String gameId) {
         return fileLocks.computeIfAbsent(gameId, key -> new Object());
     }

@@ -1,5 +1,11 @@
 package com.svi.tictactoewebservice.model;
 
+/**
+ * Holds the live, in-memory match state keyed by {@code gameCode}, including players, scores,
+ * and emotes. A room is the persistent lobby identified by {@code roomid} and tracked by the
+ * room-record repository, while a game is one round identified by {@code gameid} whose moves
+ * are persisted by the game-record repository; a session connects the room to its current round.
+ */
 public class GameSession {
 
     private String gameCode;

@@ -30,7 +30,10 @@ public class GameServiceImpl implements GameService {
     private final RoomService roomService;
     private final GameSessionRepository gameSessionRepository;
 
-    // Required so CDI can create a client proxy for this application-scoped bean.
+    /**
+     * Exists only so CDI can generate a client proxy for this application-scoped bean.
+     * Application code must use the injected constructor rather than call this constructor.
+     */
     protected GameServiceImpl() {
         this(null, null, null, null);
     }
@@ -51,6 +54,10 @@ public class GameServiceImpl implements GameService {
     // SAVE MOVE
     // ========================================
 
+    /**
+     * Persists a move while synchronizing on its room's live session so concurrent moves cannot
+     * be handled out of order or interleave operations that depend on the same session state.
+     */
     @Override
     public void save(SaveRequest request) {
         GameSession session = getSessionForSave(request);

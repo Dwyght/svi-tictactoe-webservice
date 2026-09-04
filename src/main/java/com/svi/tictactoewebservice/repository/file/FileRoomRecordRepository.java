@@ -25,6 +25,10 @@ public class FileRoomRecordRepository implements RoomRecordRepository {
     private static final Logger LOGGER =
             Logger.getLogger(FileRoomRecordRepository.class.getName());
 
+    /**
+     * Maintains one lock per room ID so unrelated room files remain independent while the
+     * read-check-append sequence for one flat file cannot race with a concurrent writer.
+     */
     private final ConcurrentHashMap<String, Object> fileLocks = new ConcurrentHashMap<>();
 
     @Override
@@ -115,6 +119,10 @@ public class FileRoomRecordRepository implements RoomRecordRepository {
         return gameIds;
     }
 
+    /**
+     * Returns the shared monitor for a room ID; atomic map initialization ensures every thread
+     * targeting that room's file synchronizes on the same object.
+     */
     private Object getFileLock(String roomId) {
         return fileLocks.computeIfAbsent(roomId, key -> new Object());
     }

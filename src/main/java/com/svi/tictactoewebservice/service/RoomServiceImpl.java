@@ -15,7 +15,10 @@ public class RoomServiceImpl implements RoomService {
 
     private final RoomRecordRepository roomRecordRepository;
 
-    // Required so CDI can create a client proxy for this application-scoped bean.
+    /**
+     * Exists only so CDI can generate a client proxy for this application-scoped bean.
+     * Application code must use the injected constructor rather than call this constructor.
+     */
     protected RoomServiceImpl() {
         this(null);
     }

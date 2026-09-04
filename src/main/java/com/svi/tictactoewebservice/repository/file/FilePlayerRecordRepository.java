@@ -18,6 +18,10 @@ public class FilePlayerRecordRepository implements PlayerRecordRepository {
     private static final Logger LOGGER =
             Logger.getLogger(FilePlayerRecordRepository.class.getName());
 
+    /**
+     * Maintains one lock per player ID so unrelated player files remain independent while the
+     * read-check-append sequence for one flat file cannot race with a concurrent writer.
+     */
     private final ConcurrentHashMap<String, Object> fileLocks = new ConcurrentHashMap<>();
 
     @Override
@@ -84,6 +88,10 @@ public class FilePlayerRecordRepository implements PlayerRecordRepository {
         return gameIds;
     }
 
+    /**
+     * Returns the shared monitor for a player ID; atomic map initialization ensures every
+     * thread targeting that player's file synchronizes on the same object.
+     */
     private Object getFileLock(String playerId) {
         return fileLocks.computeIfAbsent(playerId, key -> new Object());
     }
