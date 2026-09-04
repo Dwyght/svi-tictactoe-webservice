@@ -1,7 +1,7 @@
 package com.svi.tictactoewebservice.controller;
 
 import com.svi.tictactoewebservice.dto.response.GameListResponse;
-import com.svi.tictactoewebservice.model.GameId;
+import com.svi.tictactoewebservice.model.RecordId;
 import com.svi.tictactoewebservice.service.GameService;
 
 import javax.enterprise.context.RequestScoped;
@@ -26,7 +26,7 @@ public class PlayerController {
     @GET
     @Path("/{playerId}/games")
     public Response getPlayerGames(@PathParam("playerId") String playerId) {
-        List<GameId> games = gameService.getPlayerGames(playerId);
-        return Response.ok(new GameListResponse(games, "Records found")).build();
+        List<RecordId> recordIds = gameService.getPlayerGames(playerId);
+        return Response.ok(new GameListResponse(recordIds, "Records found")).build();
     }
 }

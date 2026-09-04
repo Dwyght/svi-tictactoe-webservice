@@ -8,8 +8,8 @@ import com.svi.tictactoewebservice.exception.RecordNotFoundException;
 import com.svi.tictactoewebservice.exception.RecordSaveException;
 import com.svi.tictactoewebservice.exception.PlayerNameConflictException;
 import com.svi.tictactoewebservice.model.Game;
-import com.svi.tictactoewebservice.model.GameId;
 import com.svi.tictactoewebservice.model.GameSession;
+import com.svi.tictactoewebservice.model.RecordId;
 import com.svi.tictactoewebservice.repository.GameRecordRepository;
 import com.svi.tictactoewebservice.repository.GameSessionRepository;
 import com.svi.tictactoewebservice.repository.PlayerRecordRepository;
@@ -82,20 +82,20 @@ public class GameServiceImpl implements GameService {
     // ========================================
 
     @Override
-    public List<GameId> getAllGames() {
+    public List<RecordId> getAllGames() {
         List<String> gameIds = gameRecordRepository.findAllGameIds();
 
         if (gameIds.isEmpty()) {
             throw new RecordNotFoundException("Record not found");
         }
 
-        List<GameId> games = new ArrayList<>();
+        List<RecordId> recordIds = new ArrayList<>();
 
         for (String gameId : gameIds) {
-            games.add(new GameId(gameId));
+            recordIds.add(new RecordId(gameId));
         }
 
-        return games;
+        return recordIds;
     }
 
     // ========================================
@@ -103,19 +103,19 @@ public class GameServiceImpl implements GameService {
     // ========================================
 
     @Override
-    public List<GameId> getPlayerGames(String playerId) {
+    public List<RecordId> getPlayerGames(String playerId) {
         if (!playerRecordRepository.existsByPlayerId(playerId)) {
             throw new RecordNotFoundException("Record not found");
         }
 
         List<String> gameIds = playerRecordRepository.findGameIdsByPlayerId(playerId);
-        List<GameId> games = new ArrayList<>();
+        List<RecordId> recordIds = new ArrayList<>();
 
         for (String gameId : gameIds) {
-            games.add(new GameId(gameId));
+            recordIds.add(new RecordId(gameId));
         }
 
-        return games;
+        return recordIds;
     }
 
     // ========================================

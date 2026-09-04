@@ -1,7 +1,7 @@
 package com.svi.tictactoewebservice.service;
 
 import com.svi.tictactoewebservice.exception.RecordNotFoundException;
-import com.svi.tictactoewebservice.model.GameId;
+import com.svi.tictactoewebservice.model.RecordId;
 import com.svi.tictactoewebservice.repository.RoomRecordRepository;
 
 import javax.enterprise.context.ApplicationScoped;
@@ -26,36 +26,36 @@ public class RoomServiceImpl implements RoomService {
     }
 
     @Override
-    public List<GameId> getAllRooms() {
+    public List<RecordId> getAllRooms() {
         List<String> roomIds = roomRecordRepository.findAllRoomIds();
 
         if (roomIds.isEmpty()) {
             throw new RecordNotFoundException("Record not found");
         }
 
-        List<GameId> rooms = new ArrayList<>();
+        List<RecordId> recordIds = new ArrayList<>();
 
         for (String roomId : roomIds) {
-            rooms.add(new GameId(roomId));
+            recordIds.add(new RecordId(roomId));
         }
 
-        return rooms;
+        return recordIds;
     }
 
     @Override
-    public List<GameId> getRoomGames(String roomId) {
+    public List<RecordId> getRoomGames(String roomId) {
         if (!roomRecordRepository.existsByRoomId(roomId)) {
             throw new RecordNotFoundException("Record not found");
         }
 
         List<String> gameIds = roomRecordRepository.findGameIdsByRoomId(roomId);
-        List<GameId> games = new ArrayList<>();
+        List<RecordId> recordIds = new ArrayList<>();
 
         for (String gameId : gameIds) {
-            games.add(new GameId(gameId));
+            recordIds.add(new RecordId(gameId));
         }
 
-        return games;
+        return recordIds;
     }
 
     @Override

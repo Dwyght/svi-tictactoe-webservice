@@ -1,7 +1,7 @@
 package com.svi.tictactoewebservice.controller;
 
 import com.svi.tictactoewebservice.dto.response.GameListResponse;
-import com.svi.tictactoewebservice.model.GameId;
+import com.svi.tictactoewebservice.model.RecordId;
 import com.svi.tictactoewebservice.service.RoomService;
 
 import javax.enterprise.context.RequestScoped;
@@ -30,8 +30,8 @@ public class RoomController {
     @GET
     @Path("/rooms")
     public Response getAllRooms() {
-        List<GameId> rooms = roomService.getAllRooms();
-        return Response.ok(new GameListResponse(rooms, "Records found")).build();
+        List<RecordId> recordIds = roomService.getAllRooms();
+        return Response.ok(new GameListResponse(recordIds, "Records found")).build();
     }
 
     // ========================================
@@ -41,7 +41,7 @@ public class RoomController {
     @GET
     @Path("/room/{roomId}/games")
     public Response getRoomGames(@PathParam("roomId") String roomId) {
-        List<GameId> games = roomService.getRoomGames(roomId);
-        return Response.ok(new GameListResponse(games, "Records found")).build();
+        List<RecordId> recordIds = roomService.getRoomGames(roomId);
+        return Response.ok(new GameListResponse(recordIds, "Records found")).build();
     }
 }

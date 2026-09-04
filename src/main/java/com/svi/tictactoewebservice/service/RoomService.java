@@ -1,14 +1,14 @@
 package com.svi.tictactoewebservice.service;
 
-import com.svi.tictactoewebservice.model.GameId;
+import com.svi.tictactoewebservice.model.RecordId;
 
 import java.util.List;
 
 public interface RoomService {
 
-    List<GameId> getAllRooms();
+    List<RecordId> getAllRooms();
 
-    List<GameId> getRoomGames(String roomId);
+    List<RecordId> getRoomGames(String roomId);
 
     void recordGameForRoom(String roomId, String gameId);
 }

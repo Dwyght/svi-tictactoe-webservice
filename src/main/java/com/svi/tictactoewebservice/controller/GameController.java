@@ -5,7 +5,7 @@ import com.svi.tictactoewebservice.dto.response.GameDetailsResponse;
 import com.svi.tictactoewebservice.dto.response.GameListResponse;
 import com.svi.tictactoewebservice.dto.response.MessageResponse;
 import com.svi.tictactoewebservice.model.Game;
-import com.svi.tictactoewebservice.model.GameId;
+import com.svi.tictactoewebservice.model.RecordId;
 import com.svi.tictactoewebservice.service.GameService;
 
 import javax.enterprise.context.RequestScoped;
@@ -48,8 +48,8 @@ public class GameController {
     @GET
     @Path("")
     public Response getAllGames() {
-        List<GameId> games = gameService.getAllGames();
-        return Response.ok(new GameListResponse(games, "Records found")).build();
+        List<RecordId> recordIds = gameService.getAllGames();
+        return Response.ok(new GameListResponse(recordIds, "Records found")).build();
     }
 
     // ========================================

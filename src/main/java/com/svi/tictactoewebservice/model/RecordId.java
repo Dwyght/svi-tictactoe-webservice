@@ -1,13 +1,13 @@
 package com.svi.tictactoewebservice.model;
 
-public class GameId {
+public class RecordId {
 
     private String id;
 
-    public GameId() {
+    public RecordId() {
     }
 
-    public GameId(String id) {
+    public RecordId(String id) {
         this.id = id;
     }
 

@@ -5,7 +5,7 @@ import com.svi.tictactoewebservice.dto.request.PlayerSessionRequest;
 import com.svi.tictactoewebservice.dto.request.SaveRequest;
 import com.svi.tictactoewebservice.dto.request.ScoreRequest;
 import com.svi.tictactoewebservice.model.Game;
-import com.svi.tictactoewebservice.model.GameId;
+import com.svi.tictactoewebservice.model.RecordId;
 import com.svi.tictactoewebservice.model.GameSession;
 
 import java.util.List;
@@ -14,9 +14,9 @@ public interface GameService {
 
     void save(SaveRequest request);
 
-    List<GameId> getAllGames();
+    List<RecordId> getAllGames();
 
-    List<GameId> getPlayerGames(String playerId);
+    List<RecordId> getPlayerGames(String playerId);
 
     List<Game> getGame(String gameId);
 
