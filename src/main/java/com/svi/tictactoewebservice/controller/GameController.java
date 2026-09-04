@@ -10,6 +10,7 @@ import com.svi.tictactoewebservice.service.GameService;
 
 import javax.enterprise.context.RequestScoped;
 import javax.inject.Inject;
+import javax.validation.Valid;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
@@ -36,7 +37,7 @@ public class GameController {
     @POST
     @Path("/save")
     @Consumes(MediaType.APPLICATION_JSON)
-    public Response save(SaveRequest request) {
+    public Response save(@Valid SaveRequest request) {
         gameService.save(request);
         return Response.ok(new MessageResponse("Record saved.")).build();
     }

@@ -111,53 +111,6 @@ class GameServiceImplTest {
     }
 
     @Test
-    @DisplayName("save rejects blank required fields")
-    void saveRejectsBlankRequiredFields() {
-        SaveRequest blankRoomId = validSaveRequest();
-        blankRoomId.setRoomid("   ");
-        SaveRequest blankGameId = validSaveRequest();
-        blankGameId.setGameid("   ");
-        SaveRequest blankSymbol = validSaveRequest();
-        blankSymbol.setSymbol("   ");
-        SaveRequest blankLocation = validSaveRequest();
-        blankLocation.setLocation("   ");
-        SaveRequest blankDateSave = validSaveRequest();
-        blankDateSave.setDatesave("   ");
-
-        assertAll(
-                () -> assertThrows(RecordSaveException.class,
-                        () -> gameService.save(blankRoomId)),
-                () -> assertThrows(RecordSaveException.class,
-                        () -> gameService.save(blankGameId)),
-                () -> assertThrows(RecordSaveException.class,
-                        () -> gameService.save(blankSymbol)),
-                () -> assertThrows(RecordSaveException.class,
-                        () -> gameService.save(blankLocation)),
-                () -> assertThrows(RecordSaveException.class,
-                        () -> gameService.save(blankDateSave)));
-        verifyNoInteractions(
-                gameRecordRepository,
-                playerRecordRepository,
-                roomService,
-                gameSessionRepository);
-    }
-
-    @Test
-    @DisplayName("save rejects a player id that does not match the allowed pattern")
-    void saveRejectsInvalidPlayerId() {
-        SaveRequest request = validSaveRequest();
-        request.setPlayerid("invalid!");
-
-        assertThrows(RecordSaveException.class, () -> gameService.save(request));
-
-        verifyNoInteractions(
-                gameRecordRepository,
-                playerRecordRepository,
-                roomService,
-                gameSessionRepository);
-    }
-
-    @Test
     @DisplayName("save wraps repository runtime failures in RecordSaveException")
     void saveWrapsRepositoryRuntimeFailure() {
         SaveRequest request = validSaveRequest();
@@ -173,6 +126,23 @@ class GameServiceImplTest {
         assertSame(repositoryFailure, exception.getCause());
         verify(playerRecordRepository, never()).saveGameId(any(), any());
         verify(roomService, never()).recordGameForRoom(any(), any());
+    }
+
+    @Test
+    @DisplayName("save relies on the controller boundary for request field validation")
+    void saveDoesNotRepeatRequestFieldValidation() {
+        SaveRequest request = validSaveRequest();
+        request.setLocation("   ");
+        GameSession session = sessionWithCurrentGame(request.getRoomid(), request.getGameid());
+        when(gameSessionRepository.findByGameCode(request.getRoomid())).thenReturn(session);
+
+        gameService.save(request);
+
+        ArgumentCaptor<Game> gameCaptor = ArgumentCaptor.forClass(Game.class);
+        verify(gameRecordRepository).save(gameCaptor.capture());
+        assertEquals("   ", gameCaptor.getValue().getLocation());
+        verify(playerRecordRepository).saveGameId(request.getPlayerid(), request.getGameid());
+        verify(roomService).recordGameForRoom(request.getRoomid(), request.getGameid());
     }
 
     @Test

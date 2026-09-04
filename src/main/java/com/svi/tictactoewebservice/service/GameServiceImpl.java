@@ -53,7 +53,6 @@ public class GameServiceImpl implements GameService {
 
     @Override
     public void save(SaveRequest request) {
-        validateSaveRequest(request);
         GameSession session = getSessionForSave(request);
         Game game = new Game(
                 request.getGameid(),
@@ -259,21 +258,6 @@ public class GameServiceImpl implements GameService {
         return session;
     }
 
-    private void validateSaveRequest(SaveRequest request) {
-        if (request == null) {
-            throw new RecordSaveException("Record could not be saved");
-        }
-
-        if (isBlank(request.getRoomid())
-                || isBlank(request.getGameid())
-                || !request.getPlayerid().matches("^[A-Za-z0-9_-]{1,10}$")
-                || isBlank(request.getSymbol())
-                || isBlank(request.getLocation())
-                || isBlank(request.getDatesave())) {
-            throw new RecordSaveException("Record could not be saved");
-        }
-    }
-
     private void validateOpponentPlayerName(String playerId, String opponentPlayerId) {
         if (opponentPlayerId != null && playerId.equalsIgnoreCase(opponentPlayerId)) {
             throw new PlayerNameConflictException("Player name is already being used in this room.");
@@ -288,9 +272,5 @@ public class GameServiceImpl implements GameService {
         }
 
         return session;
-    }
-
-    private boolean isBlank(String value) {
-        return value == null || value.trim().isEmpty();
     }
 }
