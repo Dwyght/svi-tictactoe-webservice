@@ -18,7 +18,8 @@ The separate Tic-Tac-Toe game server remains responsible for the live board, tur
 ## Requirements
 
 - JDK 8
-- Payara Server compatible with Jakarta EE 8
+- Maven 3 (or the included Maven Wrapper)
+- A Jakarta EE 8-compatible servlet container or application server that provides JAX-RS, CDI, JSON-B, and Bean Validation; Payara Server is the reference deployment used by this project
 - Port `8080` available, or corresponding frontend URL changes
 
 No standalone `main()` method is provided. The application runs as a WAR inside Payara.
@@ -34,19 +35,32 @@ GAMES_DIRECTORY=./records/games
 FRONTEND_URLS=http\://localhost:5500,http\://127.0.0.1:5500
 ```
 
-The relative directory paths resolve from the working directory where the application-server process is launched. Ensure that location is writable by the server process. `FRONTEND_URLS` is a comma-separated allowlist; whitespace around entries is ignored.
+| Setting | Purpose |
+| --- | --- |
+| `PLAYERS_DIRECTORY` | Directory containing one game-id index file per player. |
+| `ROOMS_DIRECTORY` | Directory containing one game-id index file per room. |
+| `GAMES_DIRECTORY` | Directory containing the persisted move records for each game. |
+| `FRONTEND_URLS` | Comma-separated CORS allowlist of frontend origins permitted to call the API from a browser. |
+
+Relative record paths resolve from the working directory where the application-server process is launched, not from the WAR or repository location. The defaults therefore create a portable `records/` tree beneath that working location. A deployment may use different relative paths or environment-specific absolute paths, but developer-specific paths must not be committed as shared defaults. Ensure that the configured location is writable by the server process. Whitespace around entries in `FRONTEND_URLS` is ignored.
 
 At application startup, `AppStartup` loads this file through the `CONFIG_INI_LOCATION` context parameter in `web.xml`. It then creates the players, rooms, and games directories beneath `./records` if they do not already exist.
 
 ## Build
 
-From the project root on Windows:
+From the project root, run:
+
+```bash
+mvn clean package
+```
+
+Alternatively, use the included Maven Wrapper on Windows:
 
 ```powershell
 .\mvnw.cmd clean package
 ```
 
-On macOS or Linux:
+Or on macOS and Linux:
 
 ```bash
 ./mvnw clean package
@@ -58,7 +72,9 @@ The generated artifact is:
 target/tictactoe-webservice-1.0.war
 ```
 
-## Deploy to Payara
+## Deploy
+
+Deploy the generated WAR with the normal deployment mechanism for the chosen Jakarta EE 8 server. For Payara:
 
 1. Start a Payara domain.
 2. Deploy `target/tictactoe-webservice-1.0.war` through the Admin Console or `asadmin`.
@@ -86,7 +102,17 @@ http://localhost:8080/tictactoe-webservice-1.0/api
 
 `/api` is declared by `TicTacToeApplication` using `@ApplicationPath`.
 
-## Endpoints
+## Domain model
+
+A **room** is a persistent lobby identified by `roomid`; its record is an index of games played in that room. A **session** is the current in-memory `GameSession`, keyed by `gameCode`, that holds live player assignments, sushi choices, scores, emotes, and the current game id. A **game** is one round identified by `gameid`, whose individual moves are persisted by the game repository. For a move to be saved, its `roomid` must identify the same live-session key used as `gameCode`, and its `gameid` must match that session's current game.
+
+The session, room, score, and emote APIs extend the original persisted-game-history endpoints with multiplayer lobby support, live score synchronization, and emote reactions. Session state is held only in memory; the room-to-game index and game moves are persisted separately.
+
+## API reference
+
+All paths below are relative to the [API base URL](#api-base-url). JSON endpoints consume and produce `application/json` unless noted otherwise.
+
+### Endpoint summary
 
 | Method | Path | Request | Successful response |
 | --- | --- | --- | --- |
@@ -149,7 +175,7 @@ Send an emote:
 
 Valid emote IDs are `angry`, `cry`, `haha`, `happy`, `hm`, and `sad`.
 
-### Response shapes
+### Shared response shapes
 
 Game, room, and player history lists use:
 
@@ -193,6 +219,99 @@ A runtime session contains:
 }
 ```
 
+### Endpoint details
+
+#### `POST /game/save`
+
+- **Purpose:** Persist one move for the room's current game, add the game id to the player's index, and add it to the room's index.
+- **Request body:** The save-move JSON shown under [Request bodies](#request-bodies). All fields are required. `playerid` must contain 1-10 letters, numbers, underscores, or hyphens, and `symbol` must be `X` or `O`.
+- **Success:** `200 OK` with `{"msg":"Record saved."}`.
+- **Errors:** `400 Bad Request` for Bean Validation failures; `401 Unauthorized` when the room has no live session, `gameid` is not that session's current game, or the persistence operation cannot be completed; `500 Internal Server Error` for any other unhandled failure.
+
+#### `GET /game`
+
+- **Purpose:** List every persisted game id.
+- **Request body:** None.
+- **Success:** `200 OK` with the shared id-list response.
+- **Errors:** `402 Payment Required` when no valid persisted game records are found; `500 Internal Server Error` for an unhandled repository failure.
+
+#### `GET /game/{gameId}`
+
+- **Purpose:** Return all persisted moves for `gameId`, ordered by `datesave` ascending.
+- **Request body:** None.
+- **Success:** `200 OK` with the shared game-details response.
+- **Errors:** `402 Payment Required` when the game record does not exist; `500 Internal Server Error` for an unhandled repository or record-parsing failure.
+
+#### `GET /player/{playerId}/games`
+
+- **Purpose:** List the game ids recorded for `playerId`.
+- **Request body:** None.
+- **Success:** `200 OK` with the shared id-list response. An existing but empty player index produces an empty `list`.
+- **Errors:** `402 Payment Required` when the player's record does not exist; `500 Internal Server Error` for an unhandled repository failure.
+
+#### `GET /rooms`
+
+- **Purpose:** List every persisted room id.
+- **Request body:** None.
+- **Success:** `200 OK` with the shared id-list response.
+- **Errors:** `402 Payment Required` when no persisted room records are found; `500 Internal Server Error` for an unhandled repository failure.
+
+#### `GET /room/{roomId}/games`
+
+- **Purpose:** List the game ids recorded for `roomId`.
+- **Request body:** None.
+- **Success:** `200 OK` with the shared id-list response. An existing but empty room index produces an empty `list`.
+- **Errors:** `402 Payment Required` when the room record does not exist; `500 Internal Server Error` for an unhandled repository failure.
+
+#### `POST /session/{gameCode}/game`
+
+- **Purpose:** Create the session if necessary, generate a new UUID game id, make it the session's current game, and clear its previous emote state.
+- **Request body:** None.
+- **Success:** `200 OK` with `{"gameid":"550e8400-e29b-41d4-a716-446655440000"}`.
+- **Errors:** `500 Internal Server Error` for an unhandled session repository failure.
+
+#### `GET /session/{gameCode}/game`
+
+- **Purpose:** Return the current game id for the live session identified by `gameCode`.
+- **Request body:** None.
+- **Success:** `200 OK` with `{"gameid":"550e8400-e29b-41d4-a716-446655440000"}`.
+- **Errors:** `402 Payment Required` when the session does not exist or has no current game; `500 Internal Server Error` for an unhandled session repository failure.
+
+#### `POST /session/{gameCode}/player`
+
+- **Purpose:** Register the `X` or `O` player and sushi choice on the live session. A missing session is created automatically.
+- **Request body:** The player-session JSON shown under [Request bodies](#request-bodies). All fields are required; `playerid` must contain 1-10 letters, numbers, underscores, or hyphens, and `symbol` must be `X` or `O`.
+- **Success:** `200 OK` with `{"msg":"Player registered."}`.
+- **Errors:** `400 Bad Request` for Bean Validation failures; `409 Conflict` if the same player id, compared case-insensitively, is already assigned to the opposite symbol; `500 Internal Server Error` for an unhandled session repository failure.
+
+#### `POST /session/{gameCode}/score`
+
+- **Purpose:** Replace the live session's `X` and `O` scores so connected clients can stay synchronized.
+- **Request body:** The score JSON shown under [Request bodies](#request-bodies). Both scores must be zero or greater.
+- **Success:** `200 OK` with `{"msg":"Score updated."}`.
+- **Errors:** `400 Bad Request` for a negative score or another Bean Validation failure; `402 Payment Required` when the session does not exist; `500 Internal Server Error` for an unhandled session repository failure.
+
+#### `POST /session/{gameCode}/emote`
+
+- **Purpose:** Store the latest emote for one symbol and advance that symbol's emote event id so clients can detect a new reaction.
+- **Request body:** The emote JSON shown under [Request bodies](#request-bodies). `symbol` must be `X` or `O`; `emoteid` must be `angry`, `cry`, `haha`, `happy`, `hm`, or `sad`.
+- **Success:** `200 OK` with `{"msg":"Emote sent."}`.
+- **Errors:** `400 Bad Request` for Bean Validation failures; `402 Payment Required` when the session does not exist; `500 Internal Server Error` for an unhandled session repository failure.
+
+#### `GET /session/{gameCode}`
+
+- **Purpose:** Return the complete live state for the session identified by `gameCode`.
+- **Request body:** None.
+- **Success:** `200 OK` with the shared runtime-session response.
+- **Errors:** `402 Payment Required` when the session does not exist; `500 Internal Server Error` for an unhandled session repository failure.
+
+#### `GET /health-check`
+
+- **Purpose:** Confirm that the deployed API is reachable.
+- **Request body:** None.
+- **Success:** `200 OK`, `text/plain`, with `Tic Tac Toe API works!`.
+- **Errors:** No application-specific error response is defined; an unexpected runtime failure is mapped to `500 Internal Server Error`.
+
 ## HTTP status and error format
 
 JSON errors use the following shape:
@@ -216,11 +335,11 @@ Statuses `401` and `402` are intentional parts of this application's existing AP
 
 ## Persistence
 
-The application uses three file-backed repositories:
+The application uses three file-backed repositories under the configured directories:
 
-- `games/{gameId}.txt` stores one comma-separated move per line in the order `gameid,playerid,symbol,location,datesave`.
-- `players/{playerId}.txt` stores one game ID per line.
-- `rooms/{roomId}.txt` stores one game ID per line.
+- `GAMES_DIRECTORY/<gameid>.txt` stores one comma-separated move per line in the exact order `gameid,playerid,symbol,location,datesave`.
+- `PLAYERS_DIRECTORY/<playerid>.txt` stores one `gameid` per line, creating the player's game-history index.
+- `ROOMS_DIRECTORY/<roomid>.txt` stores one `gameid` per line, creating the room-to-game index.
 
 Writes and reads use per-ID locks so unrelated games, players, and rooms can proceed concurrently without interleaving writes to the same file.
 
