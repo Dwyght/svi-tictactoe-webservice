@@ -1,5 +1,6 @@
 package com.svi.tictactoewebservice.controller;
 
+import com.svi.tictactoewebservice.annotation.GameCode;
 import com.svi.tictactoewebservice.dto.request.EmoteRequest;
 import com.svi.tictactoewebservice.dto.request.PlayerSessionRequest;
 import com.svi.tictactoewebservice.dto.request.ScoreRequest;
@@ -35,7 +36,10 @@ public class SessionController {
 
     @POST
     @Path("/session/{gameCode}/game")
-    public Response createGameId(@PathParam("gameCode") String gameCode) {
+    public Response createGameId(
+            @PathParam("gameCode")
+            @GameCode
+            String gameCode) {
         String gameId = gameService.createGameId(gameCode);
         return Response.ok(new GameIdResponse(gameId)).build();
     }
@@ -46,7 +50,10 @@ public class SessionController {
 
     @GET
     @Path("/session/{gameCode}/game")
-    public Response getCurrentGameId(@PathParam("gameCode") String gameCode) {
+    public Response getCurrentGameId(
+            @PathParam("gameCode")
+            @GameCode
+            String gameCode) {
         String gameId = gameService.getCurrentGameId(gameCode);
         return Response.ok(new GameIdResponse(gameId)).build();
     }
@@ -58,7 +65,10 @@ public class SessionController {
     @POST
     @Path("/session/{gameCode}/player")
     @Consumes(MediaType.APPLICATION_JSON)
-    public Response registerPlayer(@PathParam("gameCode") String gameCode,
+    public Response registerPlayer(
+            @PathParam("gameCode")
+            @GameCode
+            String gameCode,
             @Valid PlayerSessionRequest request) {
         gameService.registerPlayer(gameCode, request);
         return Response.ok(new MessageResponse("Player registered.")).build();
@@ -71,7 +81,10 @@ public class SessionController {
     @POST
     @Path("/session/{gameCode}/score")
     @Consumes(MediaType.APPLICATION_JSON)
-    public Response updateScore(@PathParam("gameCode") String gameCode,
+    public Response updateScore(
+            @PathParam("gameCode")
+            @GameCode
+            String gameCode,
             @Valid ScoreRequest request) {
         gameService.updateScore(gameCode, request);
         return Response.ok(new MessageResponse("Score updated.")).build();
@@ -84,7 +97,10 @@ public class SessionController {
     @POST
     @Path("/session/{gameCode}/emote")
     @Consumes(MediaType.APPLICATION_JSON)
-    public Response sendEmote(@PathParam("gameCode") String gameCode,
+    public Response sendEmote(
+            @PathParam("gameCode")
+            @GameCode
+            String gameCode,
             @Valid EmoteRequest request) {
         gameService.sendEmote(gameCode, request);
         return Response.ok(new MessageResponse("Emote sent.")).build();
@@ -96,7 +112,10 @@ public class SessionController {
 
     @GET
     @Path("/session/{gameCode}")
-    public Response getSession(@PathParam("gameCode") String gameCode) {
+    public Response getSession(
+            @PathParam("gameCode")
+            @GameCode
+            String gameCode) {
         GameSession session = gameService.getSession(gameCode);
         return Response.ok(new GameSessionResponse(session)).build();
     }

@@ -1,5 +1,6 @@
 package com.svi.tictactoewebservice.controller;
 
+import com.svi.tictactoewebservice.annotation.GameId;
 import com.svi.tictactoewebservice.dto.request.SaveRequest;
 import com.svi.tictactoewebservice.dto.response.GameDetailsResponse;
 import com.svi.tictactoewebservice.dto.response.GameListResponse;
@@ -47,7 +48,6 @@ public class GameController {
     // ========================================
 
     @GET
-    @Path("")
     public Response getAllGames() {
         List<RecordId> recordIds = gameService.getAllGames();
         return Response.ok(new GameListResponse(recordIds, "Records found")).build();
@@ -59,7 +59,10 @@ public class GameController {
 
     @GET
     @Path("/{gameId}")
-    public Response getGame(@PathParam("gameId") String gameId) {
+    public Response getGame(
+            @PathParam("gameId")
+            @GameId
+            String gameId) {
         List<Game> records = gameService.getGame(gameId);
         return Response.ok(new GameDetailsResponse(records, "Records found")).build();
     }

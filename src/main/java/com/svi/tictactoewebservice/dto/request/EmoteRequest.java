@@ -1,5 +1,7 @@
 package com.svi.tictactoewebservice.dto.request;
 
+import com.svi.tictactoewebservice.annotation.Symbol;
+
 import javax.json.bind.annotation.JsonbProperty;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Pattern;
@@ -8,10 +10,7 @@ public class EmoteRequest {
 
     @JsonbProperty("symbol")
     @NotBlank(message = "Symbol is required.")
-    @Pattern(
-            regexp = "^[XO]$",
-            message = "Symbol must be X or O."
-    )
+    @Symbol
     private String symbol;
 
     @JsonbProperty("emoteid")

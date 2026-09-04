@@ -136,7 +136,7 @@ Save an accepted move:
 
 ```json
 {
-  "roomid": "AB12CD34",
+  "roomid": "AB2CD3EF",
   "gameid": "9e2f06bf-1c2d-4e2c-9c92-55d8fb1dc934",
   "playerid": "Dwyght",
   "symbol": "X",
@@ -175,6 +175,8 @@ Send an emote:
 
 Valid emote IDs are `angry`, `cry`, `haha`, `happy`, `hm`, and `sad`.
 
+Valid sushi IDs are `x-sushi-1` through `x-sushi-5` and `o-sushi-1` through `o-sushi-5`. Move `location` is a string containing one board index from `0` through `8`. Player IDs contain 1-10 letters, numbers, underscores, or hyphens. Room and session game codes contain exactly eight characters from `ABCDEFGHJKLMNPQRSTUVWXYZ23456789`; game IDs used in paths have canonical UUID syntax.
+
 ### Shared response shapes
 
 Game, room, and player history lists use:
@@ -204,7 +206,7 @@ A runtime session contains:
 
 ```json
 {
-  "gamecode": "AB12CD34",
+  "gamecode": "AB2CD3EF",
   "gameid": "...",
   "xplayerid": "Dwyght",
   "xsushiid": "x-sushi-1",
@@ -224,7 +226,7 @@ A runtime session contains:
 #### `POST /game/save`
 
 - **Purpose:** Persist one move for the room's current game, add the game id to the player's index, and add it to the room's index.
-- **Request body:** The save-move JSON shown under [Request bodies](#request-bodies). All fields are required. `playerid` must contain 1-10 letters, numbers, underscores, or hyphens, and `symbol` must be `X` or `O`.
+- **Request body:** The save-move JSON shown under [Request bodies](#request-bodies). All fields are required. `playerid` must contain 1-10 letters, numbers, underscores, or hyphens, `symbol` must be `X` or `O`, and `location` must be a string from `0` through `8`.
 - **Success:** `200 OK` with `{"msg":"Record saved."}`.
 - **Errors:** `400 Bad Request` for Bean Validation failures; `401 Unauthorized` when the room has no live session, `gameid` is not that session's current game, or the persistence operation cannot be completed; `500 Internal Server Error` for any other unhandled failure.
 
@@ -240,14 +242,14 @@ A runtime session contains:
 - **Purpose:** Return all persisted moves for `gameId`, ordered by `datesave` ascending.
 - **Request body:** None.
 - **Success:** `200 OK` with the shared game-details response.
-- **Errors:** `402 Payment Required` when the game record does not exist; `500 Internal Server Error` for an unhandled repository or record-parsing failure.
+- **Errors:** `400 Bad Request` when `gameId` is not a canonical UUID; `402 Payment Required` when the game record does not exist; `500 Internal Server Error` for an unhandled repository or record-parsing failure.
 
 #### `GET /player/{playerId}/games`
 
 - **Purpose:** List the game ids recorded for `playerId`.
 - **Request body:** None.
 - **Success:** `200 OK` with the shared id-list response. An existing but empty player index produces an empty `list`.
-- **Errors:** `402 Payment Required` when the player's record does not exist; `500 Internal Server Error` for an unhandled repository failure.
+- **Errors:** `400 Bad Request` when `playerId` does not match the player-id format; `402 Payment Required` when the player's record does not exist; `500 Internal Server Error` for an unhandled repository failure.
 
 #### `GET /rooms`
 
@@ -261,49 +263,49 @@ A runtime session contains:
 - **Purpose:** List the game ids recorded for `roomId`.
 - **Request body:** None.
 - **Success:** `200 OK` with the shared id-list response. An existing but empty room index produces an empty `list`.
-- **Errors:** `402 Payment Required` when the room record does not exist; `500 Internal Server Error` for an unhandled repository failure.
+- **Errors:** `400 Bad Request` when `roomId` does not match the eight-character game-code format; `402 Payment Required` when the room record does not exist; `500 Internal Server Error` for an unhandled repository failure.
 
 #### `POST /session/{gameCode}/game`
 
 - **Purpose:** Create the session if necessary, generate a new UUID game id, make it the session's current game, and clear its previous emote state.
 - **Request body:** None.
 - **Success:** `200 OK` with `{"gameid":"550e8400-e29b-41d4-a716-446655440000"}`.
-- **Errors:** `500 Internal Server Error` for an unhandled session repository failure.
+- **Errors:** `400 Bad Request` when `gameCode` does not match the eight-character game-code format; `500 Internal Server Error` for an unhandled session repository failure.
 
 #### `GET /session/{gameCode}/game`
 
 - **Purpose:** Return the current game id for the live session identified by `gameCode`.
 - **Request body:** None.
 - **Success:** `200 OK` with `{"gameid":"550e8400-e29b-41d4-a716-446655440000"}`.
-- **Errors:** `402 Payment Required` when the session does not exist or has no current game; `500 Internal Server Error` for an unhandled session repository failure.
+- **Errors:** `400 Bad Request` when `gameCode` does not match the eight-character game-code format; `402 Payment Required` when the session does not exist or has no current game; `500 Internal Server Error` for an unhandled session repository failure.
 
 #### `POST /session/{gameCode}/player`
 
 - **Purpose:** Register the `X` or `O` player and sushi choice on the live session. A missing session is created automatically.
-- **Request body:** The player-session JSON shown under [Request bodies](#request-bodies). All fields are required; `playerid` must contain 1-10 letters, numbers, underscores, or hyphens, and `symbol` must be `X` or `O`.
+- **Request body:** The player-session JSON shown under [Request bodies](#request-bodies). All fields are required; `playerid` must contain 1-10 letters, numbers, underscores, or hyphens, `symbol` must be `X` or `O`, and `sushiid` must be one of the valid sushi IDs listed above.
 - **Success:** `200 OK` with `{"msg":"Player registered."}`.
-- **Errors:** `400 Bad Request` for Bean Validation failures; `409 Conflict` if the same player id, compared case-insensitively, is already assigned to the opposite symbol; `500 Internal Server Error` for an unhandled session repository failure.
+- **Errors:** `400 Bad Request` when `gameCode` or the request body fails validation; `409 Conflict` if the same player id, compared case-insensitively, is already assigned to the opposite symbol; `500 Internal Server Error` for an unhandled session repository failure.
 
 #### `POST /session/{gameCode}/score`
 
 - **Purpose:** Replace the live session's `X` and `O` scores so connected clients can stay synchronized.
 - **Request body:** The score JSON shown under [Request bodies](#request-bodies). Both scores must be zero or greater.
 - **Success:** `200 OK` with `{"msg":"Score updated."}`.
-- **Errors:** `400 Bad Request` for a negative score or another Bean Validation failure; `402 Payment Required` when the session does not exist; `500 Internal Server Error` for an unhandled session repository failure.
+- **Errors:** `400 Bad Request` when `gameCode` is invalid, a score is negative, or another Bean Validation constraint fails; `402 Payment Required` when the session does not exist; `500 Internal Server Error` for an unhandled session repository failure.
 
 #### `POST /session/{gameCode}/emote`
 
 - **Purpose:** Store the latest emote for one symbol and advance that symbol's emote event id so clients can detect a new reaction.
 - **Request body:** The emote JSON shown under [Request bodies](#request-bodies). `symbol` must be `X` or `O`; `emoteid` must be `angry`, `cry`, `haha`, `happy`, `hm`, or `sad`.
 - **Success:** `200 OK` with `{"msg":"Emote sent."}`.
-- **Errors:** `400 Bad Request` for Bean Validation failures; `402 Payment Required` when the session does not exist; `500 Internal Server Error` for an unhandled session repository failure.
+- **Errors:** `400 Bad Request` when `gameCode` or the request body fails validation; `402 Payment Required` when the session does not exist; `500 Internal Server Error` for an unhandled session repository failure.
 
 #### `GET /session/{gameCode}`
 
 - **Purpose:** Return the complete live state for the session identified by `gameCode`.
 - **Request body:** None.
 - **Success:** `200 OK` with the shared runtime-session response.
-- **Errors:** `402 Payment Required` when the session does not exist; `500 Internal Server Error` for an unhandled session repository failure.
+- **Errors:** `400 Bad Request` when `gameCode` does not match the eight-character game-code format; `402 Payment Required` when the session does not exist; `500 Internal Server Error` for an unhandled session repository failure.
 
 #### `GET /health-check`
 
@@ -325,7 +327,7 @@ JSON errors use the following shape:
 | Status | Meaning |
 | --- | --- |
 | 200 | Request completed successfully |
-| 400 | Bean Validation rejected the request |
+| 400 | Request validation or defensive record-ID validation rejected the request |
 | 401 | A move record could not be saved |
 | 402 | A requested game, player, room, or runtime session was not found |
 | 409 | The player name is already in use in the room |

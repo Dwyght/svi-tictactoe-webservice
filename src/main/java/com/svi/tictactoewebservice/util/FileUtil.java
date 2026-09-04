@@ -1,6 +1,7 @@
 package com.svi.tictactoewebservice.util;
 
 import com.svi.tictactoewebservice.config.Config;
+import com.svi.tictactoewebservice.exception.InvalidRecordIdException;
 
 import java.io.File;
 
@@ -28,15 +29,36 @@ public final class FileUtil {
     }
 
     public static File getPlayerFile(String playerId) {
-        return new File(getPlayersDirectory(), playerId + ".txt");
+        validateRecordId(playerId);
+        return getRecordFile(getPlayersDirectory(), playerId);
     }
 
     public static File getRoomFile(String roomId) {
-        return new File(getRoomsDirectory(), roomId + ".txt");
+        validateRecordId(roomId);
+        return getRecordFile(getRoomsDirectory(), roomId);
     }
 
     public static File getGameFile(String gameId) {
-        return new File(getGamesDirectory(), gameId + ".txt");
+        validateRecordId(gameId);
+        return getRecordFile(getGamesDirectory(), gameId);
+    }
+
+    private static File getRecordFile(File directory, String recordId) {
+        return new File(directory, recordId + ".txt");
+    }
+
+    private static void validateRecordId(String recordId) {
+        if (recordId == null) {
+            throw new InvalidRecordIdException("Record ID must not be null.");
+        }
+
+        if (recordId.contains("/")
+                || recordId.contains("\\")
+                || recordId.contains("..")
+                || recordId.indexOf('\0') >= 0) {
+            throw new InvalidRecordIdException(
+                    "Record ID contains unsafe path characters.");
+        }
     }
 
     private static File getOrCreateDirectory(File directory) {

@@ -9,16 +9,13 @@ import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
 
 import javax.validation.ConstraintViolation;
 import javax.validation.ConstraintViolationException;
 import javax.validation.Validation;
 import javax.validation.Validator;
 import javax.validation.ValidatorFactory;
+import javax.ws.rs.core.Application;
 import javax.ws.rs.core.Response;
 import java.lang.reflect.Method;
 import java.util.Set;
@@ -27,19 +24,17 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verifyNoInteractions;
 
-@ExtendWith(MockitoExtension.class)
 @DisplayName("GameController")
-class GameControllerTest {
+class GameControllerTest extends JerseyValidationTestSupport {
 
     private static ValidatorFactory validatorFactory;
     private static Validator validator;
 
-    @Mock
     private GameService gameService;
 
-    @InjectMocks
     private GameController controller;
 
     @BeforeAll
@@ -55,6 +50,21 @@ class GameControllerTest {
     @AfterAll
     static void closeValidatorFactory() {
         validatorFactory.close();
+    }
+
+    @Override
+    protected Application configure() {
+        gameService = mock(GameService.class);
+        controller = new GameController();
+        return validationApplication(GameController.class, gameService, GameService.class);
+    }
+
+    @Test
+    @DisplayName("getGame rejects a non-UUID game ID with 400")
+    void getGameRejectsInvalidPathParameter() {
+        assertGetRejected("game/not-a-uuid", "Invalid game ID.");
+
+        verifyNoInteractions(gameService);
     }
 
     @Test
@@ -125,7 +135,7 @@ class GameControllerTest {
         request.setGameid("game-1");
         request.setPlayerid("player_1");
         request.setSymbol("X");
-        request.setLocation("top-left");
+        request.setLocation("0");
         request.setDatesave("2026-09-04T09:00:00Z");
         return request;
     }

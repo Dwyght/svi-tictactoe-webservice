@@ -1,5 +1,6 @@
 package com.svi.tictactoewebservice.controller;
 
+import com.svi.tictactoewebservice.annotation.RoomId;
 import com.svi.tictactoewebservice.dto.response.GameListResponse;
 import com.svi.tictactoewebservice.model.RecordId;
 import com.svi.tictactoewebservice.service.RoomService;
@@ -40,7 +41,10 @@ public class RoomController {
 
     @GET
     @Path("/room/{roomId}/games")
-    public Response getRoomGames(@PathParam("roomId") String roomId) {
+    public Response getRoomGames(
+            @PathParam("roomId")
+            @RoomId
+            String roomId) {
         List<RecordId> recordIds = roomService.getRoomGames(roomId);
         return Response.ok(new GameListResponse(recordIds, "Records found")).build();
     }

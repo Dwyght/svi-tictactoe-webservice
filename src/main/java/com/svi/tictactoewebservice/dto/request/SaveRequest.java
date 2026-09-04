@@ -1,5 +1,8 @@
 package com.svi.tictactoewebservice.dto.request;
 
+import com.svi.tictactoewebservice.annotation.PlayerId;
+import com.svi.tictactoewebservice.annotation.Symbol;
+
 import javax.json.bind.annotation.JsonbProperty;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Pattern;
@@ -16,22 +19,20 @@ public class SaveRequest {
 
     @JsonbProperty("playerid")
     @NotBlank(message = "Player ID is required.")
-    @Pattern(
-            regexp = "^[A-Za-z0-9_-]{1,10}$",
-            message = "Invalid player ID."
-    )
+    @PlayerId
     private String playerid;
 
     @JsonbProperty("symbol")
     @NotBlank(message = "Symbol is required.")
-    @Pattern(
-            regexp = "^[XO]$",
-            message = "Symbol must be X or O."
-    )
+    @Symbol
     private String symbol;
 
     @JsonbProperty("location")
     @NotBlank(message = "Location is required.")
+    @Pattern(
+            regexp = "^[0-8]$",
+            message = "Location must be a valid board position."
+    )
     private String location;
 
     @JsonbProperty("datesave")
