@@ -28,15 +28,15 @@ No standalone `main()` method is provided. The application runs as a WAR inside 
 Application settings are stored in [`src/main/webapp/WEB-INF/configurations/GeneralConfig.ini`](src/main/webapp/WEB-INF/configurations/GeneralConfig.ini):
 
 ```properties
-PLAYERS_DIRECTORY=C:/Users/dwyght.delacruz/IdeaProjects/tictactoe-webservice/records/players
-ROOMS_DIRECTORY=C:/Users/dwyght.delacruz/IdeaProjects/tictactoe-webservice/records/rooms
-GAMES_DIRECTORY=C:/Users/dwyght.delacruz/IdeaProjects/tictactoe-webservice/records/games
+PLAYERS_DIRECTORY=./records/players
+ROOMS_DIRECTORY=./records/rooms
+GAMES_DIRECTORY=./records/games
 FRONTEND_URLS=http\://localhost:5500,http\://127.0.0.1:5500
 ```
 
-Update the three directory values when deploying from another location. `FRONTEND_URLS` is a comma-separated allowlist; whitespace around entries is ignored.
+The relative directory paths resolve from the working directory where the application-server process is launched. Ensure that location is writable by the server process. `FRONTEND_URLS` is a comma-separated allowlist; whitespace around entries is ignored.
 
-At application startup, `AppStartup` loads this file through the `CONFIG_INI_LOCATION` context parameter in `web.xml`. It then creates the players, rooms, and games directories if they do not already exist.
+At application startup, `AppStartup` loads this file through the `CONFIG_INI_LOCATION` context parameter in `web.xml`. It then creates the players, rooms, and games directories beneath `./records` if they do not already exist.
 
 ## Build
 
