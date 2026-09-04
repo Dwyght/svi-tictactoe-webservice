@@ -12,9 +12,14 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 @ApplicationScoped
 public class FileGameRecordRepository implements GameRecordRepository {
+
+    private static final Logger LOGGER =
+            Logger.getLogger(FileGameRecordRepository.class.getName());
 
     private final ConcurrentHashMap<String, Object> fileLocks = new ConcurrentHashMap<>();
 
@@ -103,22 +108,36 @@ public class FileGameRecordRepository implements GameRecordRepository {
 
         synchronized (getFileLock(expectedGameId)) {
             try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
-                String line;
-                while ((line = reader.readLine()) != null) {
-                    if (line.trim().isEmpty()) {
-                        continue;
-                    }
+                String firstLine = reader.readLine();
 
-                    String[] values = line.split(",", -1);
-
-                    if (values.length == 5 && expectedGameId.equals(values[0])) {
-                        return expectedGameId;
-                    }
-
+                if (firstLine == null || firstLine.trim().isEmpty()) {
+                    LOGGER.log(
+                            Level.WARNING,
+                            "Game record file '" + fileName
+                                    + "' is empty and will be excluded.");
                     return null;
                 }
 
-                return null;
+                String[] values = firstLine.split(",", -1);
+
+                if (!expectedGameId.equals(values[0])) {
+                    LOGGER.log(
+                            Level.SEVERE,
+                            "Game record file '" + fileName
+                                    + "' does not start with the expected game ID '"
+                                    + expectedGameId + "'. Actual first line: " + firstLine);
+                    return null;
+                }
+
+                if (values.length != 5) {
+                    LOGGER.log(
+                            Level.SEVERE,
+                            "Game record file '" + fileName
+                                    + "' has a malformed first line: " + firstLine);
+                    return null;
+                }
+
+                return expectedGameId;
             } catch (IOException e) {
                 throw new RuntimeException("Could not read game records.", e);
             }
